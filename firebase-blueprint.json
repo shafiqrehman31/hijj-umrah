@@ -1,0 +1,260 @@
+{
+  "entities": {
+    "Package": {
+      "title": "Package",
+      "description": "Hajj or Umrah travel package with live availability",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "maxLength": 160 },
+        "category": {
+          "type": "string",
+          "enum": [
+            "3-star-umrah",
+            "4-star-umrah",
+            "5-star-umrah",
+            "ramadan-umrah",
+            "premium-offer",
+            "3-star-hajj",
+            "5-star-hajj",
+            "umrah-2027",
+            "london-umrah"
+          ]
+        },
+        "starRating": { "type": "number" },
+        "nights": { "type": "number" },
+        "makkahNights": { "type": "number" },
+        "madinahNights": { "type": "number" },
+        "makkahHotel": { "type": "string", "maxLength": 140 },
+        "makkahDistance": { "type": "string", "maxLength": 80 },
+        "madinahHotel": { "type": "string", "maxLength": 140 },
+        "madinahDistance": { "type": "string", "maxLength": 80 },
+        "priceGbp": { "type": "number" },
+        "departureAirport": { "type": "string", "maxLength": 80 },
+        "monthTag": { "type": "string", "maxLength": 40 },
+        "cityTag": { "type": "string", "maxLength": 60 },
+        "imageUrl": { "type": "string", "maxLength": 500 },
+        "highlights": { "type": "array" },
+        "totalSlots": { "type": "number" },
+        "availableSlots": { "type": "number" },
+        "bookedSlots": { "type": "number" },
+        "active": { "type": "boolean" },
+        "displayOrder": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "title",
+        "category",
+        "starRating",
+        "nights",
+        "makkahHotel",
+        "madinahHotel",
+        "priceGbp",
+        "totalSlots",
+        "availableSlots",
+        "bookedSlots",
+        "active"
+      ]
+    },
+    "SiteContent": {
+      "title": "SiteContent",
+      "description": "CMS configurable section content for the Aqdas Travel site",
+      "type": "object",
+      "properties": {
+        "sectionKey": { "type": "string", "maxLength": 80 },
+        "payload": { "type": "object" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sectionKey", "payload"]
+    },
+    "NavigationConfig": {
+      "title": "NavigationConfig",
+      "description": "Configurable multi-level navigation menu items",
+      "type": "object",
+      "properties": {
+        "items": { "type": "array" },
+        "adminRouteSlug": { "type": "string", "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["items", "adminRouteSlug"]
+    },
+    "Quote": {
+      "title": "Quote",
+      "description": "Customer inquiry from the Get Best Price hero quote form",
+      "type": "object",
+      "properties": {
+        "departureDate": { "type": "string", "maxLength": 40 },
+        "departureAirport": { "type": "string", "maxLength": 80 },
+        "adults": { "type": "number" },
+        "children": { "type": "number" },
+        "infants": { "type": "number" },
+        "email": { "type": "string", "maxLength": 160 },
+        "fullName": { "type": "string", "maxLength": 120 },
+        "phone": { "type": "string", "maxLength": 40 },
+        "status": { "type": "string", "enum": ["New", "Contacted", "Quoted", "Converted"] },
+        "emailTemplateSubject": { "type": "string", "maxLength": 200 },
+        "emailTemplateBody": { "type": "string", "maxLength": 4000 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "departureDate",
+        "departureAirport",
+        "adults",
+        "children",
+        "infants",
+        "email",
+        "fullName",
+        "phone",
+        "status",
+        "createdAt"
+      ]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Confirmed or pending pilgrim booking with status & payment tracking",
+      "type": "object",
+      "properties": {
+        "bookingRef": { "type": "string", "maxLength": 40 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "customerName": { "type": "string", "maxLength": 120 },
+        "customerEmail": { "type": "string", "maxLength": 160 },
+        "customerPhone": { "type": "string", "maxLength": 40 },
+        "packageId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "packageTitle": { "type": "string", "maxLength": 160 },
+        "departureDate": { "type": "string", "maxLength": 40 },
+        "departureAirport": { "type": "string", "maxLength": 80 },
+        "adults": { "type": "number" },
+        "children": { "type": "number" },
+        "infants": { "type": "number" },
+        "totalAmountGbp": { "type": "number" },
+        "paidAmountGbp": { "type": "number" },
+        "paymentStatus": { "type": "string", "enum": ["Unpaid", "Deposit Paid", "Paid in Full"] },
+        "bookingStatus": {
+          "type": "string",
+          "enum": ["Inquiry Received", "Documents Pending", "Visa Processing", "Confirmed", "Completed", "Cancelled"]
+        },
+        "passportSubmitted": { "type": "boolean" },
+        "vaccineSubmitted": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "bookingRef",
+        "userId",
+        "customerName",
+        "customerEmail",
+        "packageId",
+        "packageTitle",
+        "departureDate",
+        "departureAirport",
+        "adults",
+        "children",
+        "infants",
+        "totalAmountGbp",
+        "paidAmountGbp",
+        "paymentStatus",
+        "bookingStatus",
+        "passportSubmitted",
+        "vaccineSubmitted",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "Mock payment transaction history record for customer bookings",
+      "type": "object",
+      "properties": {
+        "bookingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "userId": { "type": "string", "maxLength": 128 },
+        "amountGbp": { "type": "number" },
+        "method": { "type": "string", "enum": ["Mock Debit/Credit Card", "UK Bank Transfer (FPS)", "0% Installment Plan"] },
+        "referenceCode": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["Completed", "Pending Verification"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["bookingId", "userId", "amountGbp", "method", "referenceCode", "status", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Automated travel updates and visa document reminders for pilgrims",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "bookingId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 160 },
+        "message": { "type": "string", "maxLength": 1000 },
+        "type": { "type": "string", "enum": ["travel_update", "visa_reminder", "payment_receipt", "booking_status"] },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "message", "type", "read", "createdAt"]
+    },
+    "AdminNotification": {
+      "title": "AdminNotification",
+      "description": "Real-time notification alert for the website owner/admin",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 160 },
+        "message": { "type": "string", "maxLength": 600 },
+        "category": { "type": "string", "enum": ["quote", "booking", "payment", "system"] },
+        "relatedId": { "type": "string", "maxLength": 128 },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "message", "category", "read", "createdAt"]
+    },
+    "AdminSettings": {
+      "title": "AdminSettings",
+      "description": "Protected admin credentials and route settings",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string", "maxLength": 80 },
+        "passwordHash": { "type": "string", "maxLength": 128 },
+        "adminRouteSlug": { "type": "string", "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["username", "passwordHash", "adminRouteSlug", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/packages/{packageId}": {
+      "schema": { "$ref": "#/entities/Package" },
+      "description": "Umrah & Hajj packages with live availableSlots counters"
+    },
+    "/siteContent/{sectionKey}": {
+      "schema": { "$ref": "#/entities/SiteContent" },
+      "description": "CMS section documents (hero, trust, sections, faqs, testimonials, guides, services, footer)"
+    },
+    "/navigation/{menuId}": {
+      "schema": { "$ref": "#/entities/NavigationConfig" },
+      "description": "Navigation menus, nested submenus, and public admin hash slug"
+    },
+    "/quotes/{quoteId}": {
+      "schema": { "$ref": "#/entities/Quote" },
+      "description": "Quote requests submitted from the Hero Get Best Price form"
+    },
+    "/bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/Booking" },
+      "description": "Authenticated customer bookings and visa/document status"
+    },
+    "/payments/{paymentId}": {
+      "schema": { "$ref": "#/entities/Payment" },
+      "description": "Mock payment records linked to bookings"
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "Automated customer travel updates and visa document reminders"
+    },
+    "/adminNotifications/{notifId}": {
+      "schema": { "$ref": "#/entities/AdminNotification" },
+      "description": "Real-time notifications sent to the admin dashboard"
+    },
+    "/adminSettings/{settingId}": {
+      "schema": { "$ref": "#/entities/AdminSettings" },
+      "description": "Admin panel username, password hash, and route slug"
+    }
+  }
+}

@@ -1,0 +1,357 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Global Primitives ---
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isVerifiedUser() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'shafiq.rehman31@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.size() >= 5 && email.size() <= 160 && email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+    }
+
+    // --- Validation Blueprints ---
+    function isValidPackage(data) {
+      return data.keys().hasAll([
+        'title', 'category', 'starRating', 'nights', 'makkahHotel',
+        'madinahHotel', 'priceGbp', 'totalSlots', 'availableSlots', 'bookedSlots', 'active'
+      ]) &&
+      data.keys().hasOnly([
+        'id', 'title', 'category', 'starRating', 'nights', 'makkahNights', 'madinahNights',
+        'makkahHotel', 'makkahDistance', 'madinahHotel', 'madinahDistance', 'priceGbp',
+        'departureAirport', 'monthTag', 'cityTag', 'imageUrl', 'highlights',
+        'totalSlots', 'availableSlots', 'bookedSlots', 'lastBookingId', 'active', 'displayOrder', 'updatedAt'
+      ]) &&
+      data.title is string && data.title.size() >= 2 && data.title.size() <= 160 &&
+      data.category in ['3-star-umrah', '4-star-umrah', '5-star-umrah', 'ramadan-umrah', 'premium-offer', '3-star-hajj', '5-star-hajj', 'umrah-2027', 'london-umrah'] &&
+      data.starRating is number && data.starRating >= 1 && data.starRating <= 5 &&
+      data.nights is number && data.nights >= 1 && data.nights <= 60 &&
+      data.makkahHotel is string && data.makkahHotel.size() >= 2 && data.makkahHotel.size() <= 140 &&
+      data.madinahHotel is string && data.madinahHotel.size() >= 2 && data.madinahHotel.size() <= 140 &&
+      data.priceGbp is number && data.priceGbp >= 100 && data.priceGbp <= 50000 &&
+      data.totalSlots is number && data.totalSlots >= 0 && data.totalSlots <= 1000 &&
+      data.availableSlots is number && data.availableSlots >= 0 && data.availableSlots <= 1000 &&
+      data.bookedSlots is number && data.bookedSlots >= 0 && data.bookedSlots <= 1000 &&
+      data.active is bool &&
+      (!('highlights' in data) || (data.highlights is list && data.highlights.size() <= 10 && (data.highlights.size() == 0 || data.highlights[0] is string))) &&
+      (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 500)) &&
+      (!('makkahDistance' in data) || (data.makkahDistance is string && data.makkahDistance.size() <= 80)) &&
+      (!('madinahDistance' in data) || (data.madinahDistance is string && data.madinahDistance.size() <= 80)) &&
+      (!('departureAirport' in data) || (data.departureAirport is string && data.departureAirport.size() <= 80)) &&
+      (!('monthTag' in data) || (data.monthTag is string && data.monthTag.size() <= 40)) &&
+      (!('cityTag' in data) || (data.cityTag is string && data.cityTag.size() <= 60)) &&
+      (!('lastBookingId' in data) || isValidId(data.lastBookingId));
+    }
+
+    function isValidSiteContent(data) {
+      return data.keys().hasAll(['sectionKey', 'payload']) &&
+      data.keys().hasOnly(['sectionKey', 'payload', 'updatedAt']) &&
+      data.sectionKey is string && data.sectionKey.size() >= 2 && data.sectionKey.size() <= 80 &&
+      data.payload is map;
+    }
+
+    function isValidNavigationConfig(data) {
+      return data.keys().hasAll(['items', 'adminRouteSlug']) &&
+      data.keys().hasOnly(['items', 'adminRouteSlug', 'updatedAt']) &&
+      data.items is list && data.items.size() <= 20 && (data.items.size() == 0 || data.items[0] is map) &&
+      data.adminRouteSlug is string && data.adminRouteSlug.size() >= 3 && data.adminRouteSlug.size() <= 64 &&
+      data.adminRouteSlug.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidQuote(data) {
+      return data.keys().hasAll([
+        'departureDate', 'departureAirport', 'adults', 'children', 'infants',
+        'email', 'fullName', 'phone', 'status', 'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'departureDate', 'departureAirport', 'adults', 'children', 'infants',
+        'email', 'fullName', 'phone', 'status', 'emailTemplateSubject',
+        'emailTemplateBody', 'userId', 'adminNotes', 'createdAt', 'updatedAt'
+      ]) &&
+      data.departureDate is string && data.departureDate.size() >= 4 && data.departureDate.size() <= 40 &&
+      data.departureAirport is string && data.departureAirport.size() >= 2 && data.departureAirport.size() <= 80 &&
+      data.adults is number && data.adults >= 1 && data.adults <= 50 &&
+      data.children is number && data.children >= 0 && data.children <= 50 &&
+      data.infants is number && data.infants >= 0 && data.infants <= 20 &&
+      isValidEmail(data.email) &&
+      data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 120 &&
+      data.phone is string && data.phone.size() >= 6 && data.phone.size() <= 40 &&
+      data.status in ['New', 'Contacted', 'Quoted', 'Converted'] &&
+      (!('emailTemplateSubject' in data) || (data.emailTemplateSubject is string && data.emailTemplateSubject.size() <= 200)) &&
+      (!('emailTemplateBody' in data) || (data.emailTemplateBody is string && data.emailTemplateBody.size() <= 4000)) &&
+      (!('adminNotes' in data) || (data.adminNotes is string && data.adminNotes.size() <= 1000)) &&
+      (!('userId' in data) || (data.userId is string && data.userId.size() <= 128));
+    }
+
+    function isValidBooking(data) {
+      return data.keys().hasAll([
+        'bookingRef', 'userId', 'customerName', 'customerEmail', 'packageId',
+        'packageTitle', 'departureDate', 'departureAirport', 'adults', 'children',
+        'infants', 'totalAmountGbp', 'paidAmountGbp', 'paymentStatus',
+        'bookingStatus', 'passportSubmitted', 'vaccineSubmitted', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'bookingRef', 'userId', 'customerName', 'customerEmail', 'customerPhone',
+        'packageId', 'packageTitle', 'departureDate', 'departureAirport', 'adults',
+        'children', 'infants', 'totalAmountGbp', 'paidAmountGbp', 'paymentStatus',
+        'bookingStatus', 'passportSubmitted', 'vaccineSubmitted', 'notes', 'createdAt', 'updatedAt'
+      ]) &&
+      data.bookingRef is string && data.bookingRef.size() >= 4 && data.bookingRef.size() <= 40 &&
+      data.userId is string && data.userId.size() >= 4 && data.userId.size() <= 128 &&
+      data.customerName is string && data.customerName.size() >= 2 && data.customerName.size() <= 120 &&
+      isValidEmail(data.customerEmail) &&
+      isValidId(data.packageId) &&
+      data.packageTitle is string && data.packageTitle.size() >= 2 && data.packageTitle.size() <= 160 &&
+      data.departureDate is string && data.departureDate.size() >= 4 && data.departureDate.size() <= 40 &&
+      data.departureAirport is string && data.departureAirport.size() >= 2 && data.departureAirport.size() <= 80 &&
+      data.adults is number && data.adults >= 1 && data.adults <= 50 &&
+      data.children is number && data.children >= 0 && data.children <= 50 &&
+      data.infants is number && data.infants >= 0 && data.infants <= 20 &&
+      data.totalAmountGbp is number && data.totalAmountGbp >= 100 && data.totalAmountGbp <= 500000 &&
+      data.paidAmountGbp is number && data.paidAmountGbp >= 0 && data.paidAmountGbp <= data.totalAmountGbp &&
+      data.paymentStatus in ['Unpaid', 'Deposit Paid', 'Paid in Full'] &&
+      data.bookingStatus in ['Inquiry Received', 'Documents Pending', 'Visa Processing', 'Confirmed', 'Completed', 'Cancelled'] &&
+      data.passportSubmitted is bool &&
+      data.vaccineSubmitted is bool &&
+      (!('customerPhone' in data) || (data.customerPhone is string && data.customerPhone.size() <= 40)) &&
+      (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000));
+    }
+
+    function isValidPayment(data) {
+      return data.keys().hasAll([
+        'bookingId', 'userId', 'amountGbp', 'method', 'referenceCode', 'status', 'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'bookingId', 'userId', 'amountGbp', 'method', 'referenceCode', 'status', 'createdAt'
+      ]) &&
+      isValidId(data.bookingId) &&
+      data.userId is string && data.userId.size() >= 4 && data.userId.size() <= 128 &&
+      data.amountGbp is number && data.amountGbp > 0 && data.amountGbp <= 500000 &&
+      data.method in ['Mock Debit/Credit Card', 'UK Bank Transfer (FPS)', '0% Installment Plan'] &&
+      data.referenceCode is string && data.referenceCode.size() >= 4 && data.referenceCode.size() <= 64 &&
+      data.status in ['Completed', 'Pending Verification'];
+    }
+
+    function isValidNotification(data) {
+      return data.keys().hasAll([
+        'userId', 'title', 'message', 'type', 'read', 'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId', 'bookingId', 'title', 'message', 'type', 'read', 'createdAt'
+      ]) &&
+      data.userId is string && data.userId.size() >= 4 && data.userId.size() <= 128 &&
+      data.title is string && data.title.size() >= 2 && data.title.size() <= 160 &&
+      data.message is string && data.message.size() >= 2 && data.message.size() <= 1000 &&
+      data.type in ['travel_update', 'visa_reminder', 'payment_receipt', 'booking_status'] &&
+      data.read is bool &&
+      (!('bookingId' in data) || (data.bookingId is string && data.bookingId.size() <= 128));
+    }
+
+    function isValidAdminNotification(data) {
+      return data.keys().hasAll(['title', 'message', 'category', 'read', 'createdAt']) &&
+      data.keys().hasOnly(['title', 'message', 'category', 'relatedId', 'read', 'createdAt']) &&
+      data.title is string && data.title.size() >= 2 && data.title.size() <= 160 &&
+      data.message is string && data.message.size() >= 2 && data.message.size() <= 600 &&
+      data.category in ['quote', 'booking', 'payment', 'system'] &&
+      data.read is bool &&
+      (!('relatedId' in data) || (data.relatedId is string && data.relatedId.size() <= 128));
+    }
+
+    function isValidAdminSettings(data) {
+      return data.keys().hasAll(['username', 'passwordHash', 'adminRouteSlug', 'updatedAt']) &&
+      data.keys().hasOnly(['username', 'passwordHash', 'adminRouteSlug', 'updatedAt']) &&
+      data.username is string && data.username.size() >= 3 && data.username.size() <= 80 &&
+      data.passwordHash is string && data.passwordHash.size() >= 16 && data.passwordHash.size() <= 128 &&
+      data.adminRouteSlug is string && data.adminRouteSlug.size() >= 3 && data.adminRouteSlug.size() <= 64 &&
+      data.adminRouteSlug.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Collection Rules ---
+
+    // Health check document for testConnection()
+    match /test/connection {
+      allow get: if true;
+    }
+
+    // Packages: Public read, Admin write, or verified user atomic slot decrement during booking
+    match /packages/{packageId} {
+      allow get: if isValidId(packageId);
+      allow list: if true;
+      allow create: if isValidId(packageId) && isAdmin() && isValidPackage(incoming());
+      allow update: if isValidId(packageId) && isValidPackage(incoming()) && (
+        isAdmin() ||
+        (
+          isVerifiedUser() &&
+          existing().active == true &&
+          existing().availableSlots > 0 &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['availableSlots', 'bookedSlots', 'lastBookingId', 'updatedAt']) &&
+          incoming().availableSlots == existing().availableSlots - 1 &&
+          incoming().bookedSlots == existing().bookedSlots + 1 &&
+          incoming().updatedAt == request.time &&
+          'lastBookingId' in incoming() &&
+          isValidId(incoming().lastBookingId) &&
+          existsAfter(/databases/$(database)/documents/bookings/$(incoming().lastBookingId)) &&
+          getAfter(/databases/$(database)/documents/bookings/$(incoming().lastBookingId)).data.userId == request.auth.uid &&
+          getAfter(/databases/$(database)/documents/bookings/$(incoming().lastBookingId)).data.packageId == packageId
+        )
+      );
+      allow delete: if isValidId(packageId) && isAdmin();
+    }
+
+    // Site CMS Content: Public read, Admin write
+    match /siteContent/{sectionKey} {
+      allow get: if isValidId(sectionKey);
+      allow list: if true;
+      allow create, update: if isValidId(sectionKey) && isAdmin() && isValidSiteContent(incoming());
+      allow delete: if isValidId(sectionKey) && isAdmin();
+    }
+
+    // Navigation & Admin Hash Route Slug: Public read, Admin write
+    match /navigation/{menuId} {
+      allow get: if isValidId(menuId);
+      allow list: if true;
+      allow create, update: if isValidId(menuId) && isAdmin() && isValidNavigationConfig(incoming());
+      allow delete: if isValidId(menuId) && isAdmin();
+    }
+
+    // Hero Quote Inquiries: Validated create (public or signed-in), private read/update/delete
+    match /quotes/{quoteId} {
+      allow get: if isValidId(quoteId) && (isAdmin() || (isVerifiedUser() && existing().userId == request.auth.uid));
+      allow list: if isAdmin() || (isVerifiedUser() && resource.data.userId == request.auth.uid);
+      allow create: if isValidId(quoteId) &&
+        isValidQuote(incoming()) &&
+        incoming().status == 'New' &&
+        incoming().createdAt == request.time &&
+        (!('userId' in incoming()) || (isVerifiedUser() && incoming().userId == request.auth.uid));
+      allow update: if isValidId(quoteId) && isAdmin() && isValidQuote(incoming()) && incoming().createdAt == existing().createdAt;
+      allow delete: if isValidId(quoteId) && isAdmin();
+    }
+
+    // Bookings: Verified user owner or Admin
+    match /bookings/{bookingId} {
+      allow get: if isValidId(bookingId) && (isAdmin() || isOwner(existing().userId));
+      allow list: if isAdmin() || (isVerifiedUser() && resource.data.userId == request.auth.uid);
+      allow create: if isValidId(bookingId) &&
+        isVerifiedUser() &&
+        isValidBooking(incoming()) &&
+        incoming().userId == request.auth.uid &&
+        incoming().bookingStatus == 'Inquiry Received' &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        exists(/databases/$(database)/documents/packages/$(incoming().packageId));
+      allow update: if isValidId(bookingId) && isValidBooking(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().packageId == existing().packageId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          (
+            isOwner(existing().userId) &&
+            !(existing().bookingStatus in ['Completed', 'Cancelled']) &&
+            (
+              (
+                incoming().diff(existing()).affectedKeys().hasOnly(['passportSubmitted', 'vaccineSubmitted', 'updatedAt'])
+              ) ||
+              (
+                incoming().diff(existing()).affectedKeys().hasOnly(['paidAmountGbp', 'paymentStatus', 'updatedAt']) &&
+                incoming().paidAmountGbp >= existing().paidAmountGbp
+              )
+            )
+          )
+        );
+      allow delete: if isValidId(bookingId) && isAdmin();
+    }
+
+    // Mock Payments: Verified owner create & read, Admin full access
+    match /payments/{paymentId} {
+      allow get: if isValidId(paymentId) && (isAdmin() || isOwner(existing().userId));
+      allow list: if isAdmin() || (isVerifiedUser() && resource.data.userId == request.auth.uid);
+      allow create: if isValidId(paymentId) &&
+        isVerifiedUser() &&
+        isValidPayment(incoming()) &&
+        incoming().userId == request.auth.uid &&
+        incoming().createdAt == request.time &&
+        exists(/databases/$(database)/documents/bookings/$(incoming().bookingId)) &&
+        get(/databases/$(database)/documents/bookings/$(incoming().bookingId)).data.userId == request.auth.uid;
+      allow update, delete: if isValidId(paymentId) && isAdmin();
+    }
+
+    // Automated Customer Notifications: Owner read & mark read, Admin full control
+    match /notifications/{notificationId} {
+      allow get: if isValidId(notificationId) && (isAdmin() || isOwner(existing().userId));
+      allow list: if isAdmin() || (isVerifiedUser() && resource.data.userId == request.auth.uid);
+      allow create: if isValidId(notificationId) &&
+        isValidNotification(incoming()) &&
+        incoming().createdAt == request.time && (
+          isAdmin() ||
+          (isVerifiedUser() && incoming().userId == request.auth.uid && incoming().read == false)
+        );
+      allow update: if isValidId(notificationId) && isValidNotification(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt && (
+          isAdmin() ||
+          (isOwner(existing().userId) && incoming().diff(existing()).affectedKeys().hasOnly(['read']))
+        );
+      allow delete: if isValidId(notificationId) && isAdmin();
+    }
+
+    // Admin Notifications: Strictly admin read/update/delete; validated create on quote/booking submission
+    match /adminNotifications/{notifId} {
+      allow get: if isValidId(notifId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(notifId) &&
+        isValidAdminNotification(incoming()) &&
+        incoming().read == false &&
+        incoming().createdAt == request.time;
+      allow update: if isValidId(notifId) && isAdmin() && isValidAdminNotification(incoming());
+      allow delete: if isValidId(notifId) && isAdmin();
+    }
+
+    // Admin Credentials & Settings: Strictly Admin only
+    match /adminSettings/{settingId} {
+      allow get: if isValidId(settingId) && isAdmin();
+      allow list: if isAdmin();
+      allow create, update: if isValidId(settingId) && isAdmin() && isValidAdminSettings(incoming());
+      allow delete: if isValidId(settingId) && isAdmin();
+    }
+
+    // Admins Directory: Strictly Admin only
+    match /admins/{uid} {
+      allow get: if isValidId(uid) && (isAdmin() || isOwner(uid));
+      allow list, create, update, delete: if isAdmin();
+    }
+  }
+}

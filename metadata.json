@@ -1,0 +1,6 @@
+{
+  "name": "Aqdas Travel — UK Hajj & Umrah Pilgrimage Agency",
+  "description": "ATOL-protected UK Hajj and Umrah travel agency with real-time package availability, instant quote inquiries, pilgrim booking dashboard, and automated visa notifications.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

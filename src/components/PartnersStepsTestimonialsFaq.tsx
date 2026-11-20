@@ -295,14 +295,19 @@ export const PartnersStepsTestimonialsFaq: React.FC<
                   </div>
                 </div>
 
-                <div className="px-5 pb-5">
+                <div className="px-5 pb-5 flex items-center justify-between gap-2">
                   <button
                     type="button"
                     onClick={() => onSelectVideo(vid)}
                     className="text-xs font-semibold text-[#0B3B2E] hover:underline cursor-pointer"
                   >
-                    Watch Full Review & Transcript
+                    {vid.videoUrl ? 'Play Video Testimonial' : 'Watch Full Review & Transcript'}
                   </button>
+                  {vid.videoUrl && (
+                    <span className="text-[11px] font-medium text-[#9A7414]">
+                      Video Available
+                    </span>
+                  )}
                 </div>
               </div>
             ))}

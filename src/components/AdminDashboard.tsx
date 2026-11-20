@@ -20,6 +20,7 @@ import {
   Send,
   ShieldCheck,
   Trash2,
+  Video,
 } from 'lucide-react';
 import { useFirebase } from '../context/FirebaseContext';
 import {
@@ -43,6 +44,7 @@ import {
   TravelPackage,
 } from '../types';
 
+import { AdminVideoManager } from './AdminVideoManager';
 import { AirlineLogo } from './AirlineLogo';
 
 interface AdminDashboardProps {
@@ -55,6 +57,7 @@ type AdminTab =
   | 'quotes'
   | 'bookings'
   | 'packages'
+  | 'videos'
   | 'pages'
   | 'menus'
   | 'sections'
@@ -150,6 +153,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   );
   const [syncEmailAndSocials, setSyncEmailAndSocials] = useState<boolean>(true);
   const [applyingBrand, setApplyingBrand] = useState<boolean>(false);
+
+  // Video testimonials draft state
+  const [videoDraft, setVideoDraft] = useState<SiteCmsData['videoSection']>(
+    siteContent.videoSection
+  );
 
   // CMS Sections state
   const [cmsSectionKey, setCmsSectionKey] = useState<keyof SiteCmsData>('hero');
@@ -369,6 +377,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 { id: 'quotes', label: 'Quote Inquiries', icon: MessageSquareQuote, badge: adminQuotes.filter((q) => q.status === 'New').length },
                 { id: 'bookings', label: 'Bookings & Visa Desk', icon: CalendarCheck, badge: adminBookings.length },
                 { id: 'packages', label: 'Packages Manager', icon: PackageIcon },
+                { id: 'videos', label: 'Video Testimonials', icon: Video },
                 { id: 'pages', label: 'Pages CMS (All Pages)', icon: Globe },
                 { id: 'menus', label: 'Menus & Sub-Navs', icon: MenuIcon },
                 { id: 'sections', label: 'Home Sections CMS', icon: FileText },
@@ -385,6 +394,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   onClick={() => {
                     setActiveTab(tab.id);
                     if (tab.id === 'sections') setCmsDraft(siteContent);
+                    if (tab.id === 'videos') setVideoDraft(siteContent.videoSection);
                     if (tab.id === 'menus') setNavDraft(navigation.items);
                     if (tab.id === 'pages') {
                       setPagesDraft(siteContent.pages.items);
@@ -462,6 +472,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               {activeTab === 'quotes' && 'Hero Quote Form Inquiries'}
               {activeTab === 'bookings' && 'Customer Bookings & Automated Reminders'}
               {activeTab === 'packages' && 'Hajj & Umrah Packages Manager'}
+              {activeTab === 'videos' && 'Customer Video Testimonials (YouTube, URLs & Upload)'}
               {activeTab === 'pages' && 'Dedicated Pages CMS (Navigation & Legal Pages)'}
               {activeTab === 'menus' && 'Header Navigation & Sub-Menus Editor'}
               {activeTab === 'sections' && 'Homepage Sections & Content Editor'}
@@ -1192,6 +1203,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         )}
 
+        {/* 4B. CUSTOMER VIDEO TESTIMONIALS TAB */}
+        {activeTab === 'videos' && (
+          <AdminVideoManager
+            draft={videoDraft}
+            onChange={setVideoDraft}
+            onSave={async () => {
+              await saveSiteSection('videoSection', videoDraft);
+              showToast('Customer Video Testimonials published live to Firestore!');
+            }}
+            onToast={showToast}
+          />
+        )}
+
         {/* 5. PAGES CMS (ALL NAVIGATION, GUIDE, SERVICE, CITY, MONTH & LEGAL PAGES) */}
         {activeTab === 'pages' && (
           <div className="bg-white border border-stone-200 rounded-xl p-6 space-y-6">
@@ -1871,6 +1895,113 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             )}
 
+            {cmsSectionKey === 'trustSection' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      Section Heading
+                    </label>
+                    <input
+                      type="text"
+                      value={cmsDraft.trustSection.heading}
+                      onChange={(e) =>
+                        setCmsDraft({
+                          ...cmsDraft,
+                          trustSection: { ...cmsDraft.trustSection, heading: e.target.value },
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded-lg border border-stone-300 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      Section Subheading
+                    </label>
+                    <input
+                      type="text"
+                      value={cmsDraft.trustSection.subheading}
+                      onChange={(e) =>
+                        setCmsDraft({
+                          ...cmsDraft,
+                          trustSection: { ...cmsDraft.trustSection, subheading: e.target.value },
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded-lg border border-stone-300 text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {cmsDraft.trustSection.boxes.map((box, bIdx) => (
+                    <div
+                      key={box.id}
+                      className="p-4 rounded-xl border border-stone-200 bg-[#FAFAF8] space-y-2.5"
+                    >
+                      <p className="text-xs font-semibold text-[#0B3B2E] uppercase">
+                        Trust Box {bIdx + 1} ({box.actionType})
+                      </p>
+                      <input
+                        type="text"
+                        value={box.kicker}
+                        onChange={(e) => {
+                          const nextBoxes = [...cmsDraft.trustSection.boxes];
+                          nextBoxes[bIdx] = { ...nextBoxes[bIdx], kicker: e.target.value };
+                          setCmsDraft({
+                            ...cmsDraft,
+                            trustSection: { ...cmsDraft.trustSection, boxes: nextBoxes },
+                          });
+                        }}
+                        placeholder="Kicker"
+                        className="w-full px-2.5 py-1.5 rounded border border-stone-300 text-xs bg-white"
+                      />
+                      <input
+                        type="text"
+                        value={box.title}
+                        onChange={(e) => {
+                          const nextBoxes = [...cmsDraft.trustSection.boxes];
+                          nextBoxes[bIdx] = { ...nextBoxes[bIdx], title: e.target.value };
+                          setCmsDraft({
+                            ...cmsDraft,
+                            trustSection: { ...cmsDraft.trustSection, boxes: nextBoxes },
+                          });
+                        }}
+                        placeholder="Title"
+                        className="w-full px-2.5 py-1.5 rounded border border-stone-300 text-xs font-semibold bg-white"
+                      />
+                      <input
+                        type="text"
+                        value={box.actionLabel}
+                        onChange={(e) => {
+                          const nextBoxes = [...cmsDraft.trustSection.boxes];
+                          nextBoxes[bIdx] = { ...nextBoxes[bIdx], actionLabel: e.target.value };
+                          setCmsDraft({
+                            ...cmsDraft,
+                            trustSection: { ...cmsDraft.trustSection, boxes: nextBoxes },
+                          });
+                        }}
+                        placeholder="Button Label"
+                        className="w-full px-2.5 py-1.5 rounded border border-stone-300 text-xs bg-white"
+                      />
+                      <input
+                        type="text"
+                        value={box.logoUrl || ''}
+                        onChange={(e) => {
+                          const nextBoxes = [...cmsDraft.trustSection.boxes];
+                          nextBoxes[bIdx] = { ...nextBoxes[bIdx], logoUrl: e.target.value };
+                          setCmsDraft({
+                            ...cmsDraft,
+                            trustSection: { ...cmsDraft.trustSection, boxes: nextBoxes },
+                          });
+                        }}
+                        placeholder="Custom Trust Logo URL (blank = built-in SVG)"
+                        className="w-full px-2.5 py-1.5 rounded border border-stone-300 text-xs bg-white"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {(cmsSectionKey === 'section3Star' ||
               cmsSectionKey === 'section4Star' ||
               cmsSectionKey === 'section5Star' ||
@@ -2253,7 +2384,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             )}
 
+            {cmsSectionKey === 'videoSection' && (
+              <AdminVideoManager
+                draft={cmsDraft.videoSection}
+                onChange={(nextVideoSection) =>
+                  setCmsDraft({ ...cmsDraft, videoSection: nextVideoSection })
+                }
+                onSave={async () => {
+                  await saveSiteSection('videoSection', cmsDraft.videoSection);
+                  showToast('Customer Video Testimonials saved live to Firestore!');
+                }}
+                onToast={showToast}
+              />
+            )}
+
             {cmsSectionKey !== 'hero' &&
+              cmsSectionKey !== 'trustSection' &&
               cmsSectionKey !== 'section3Star' &&
               cmsSectionKey !== 'section4Star' &&
               cmsSectionKey !== 'section5Star' &&
@@ -2261,6 +2407,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               cmsSectionKey !== 'sectionPremium' &&
               cmsSectionKey !== 'contact' &&
               cmsSectionKey !== 'airlines' &&
+              cmsSectionKey !== 'videoSection' &&
               cmsSectionKey !== 'faqSection' && (
                 <div className="space-y-3">
                   <p className="text-xs text-slate-500">

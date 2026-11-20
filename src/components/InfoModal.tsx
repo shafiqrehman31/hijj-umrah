@@ -7,9 +7,9 @@ import {
   Video,
   X,
 } from 'lucide-react';
-import { useFirebase } from '../context/FirebaseContext';
+import { useFirebase, QuoteSubmissionResult } from '../context/FirebaseContext';
 import { InfoArticle, VideoTestimonial } from '../types';
-import { QuoteSubmissionResult } from '../context/FirebaseContext';
+import { parseVideoSource } from '../utils/videoUtils';
 
 export type InfoModalState =
   | { type: 'none' }
@@ -161,35 +161,70 @@ export const InfoModal: React.FC<InfoModalProps> = ({
           )}
 
           {/* Video Testimonial Player */}
-          {state.type === 'video' && (
-            <div className="space-y-4">
-              <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-950">
-                <img
-                  src={state.video.thumbnailUrl}
-                  alt={state.video.pilgrimName}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover opacity-55"
-                />
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white bg-black/35">
-                  <Video className="w-12 h-12 text-[#E5C158] mb-3" />
-                  <p className="font-display text-2xl font-semibold mb-1">
-                    {state.video.pilgrimName} ({state.video.city})
+          {state.type === 'video' && (() => {
+            const parsed = parseVideoSource(state.video.videoUrl);
+            return (
+              <div className="space-y-4">
+                <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-950 border border-stone-200">
+                  {parsed.embedUrl ? (
+                    <iframe
+                      src={parsed.embedUrl}
+                      title={`${state.video.pilgrimName} Video Testimonial`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full border-0"
+                    />
+                  ) : parsed.directUrl ? (
+                    <video
+                      src={parsed.directUrl}
+                      poster={state.video.thumbnailUrl}
+                      controls
+                      autoPlay
+                      playsInline
+                      className="w-full h-full object-contain bg-black"
+                    />
+                  ) : (
+                    <>
+                      <img
+                        src={state.video.thumbnailUrl}
+                        alt={state.video.pilgrimName}
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover opacity-55"
+                      />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white bg-black/35">
+                        <Video className="w-12 h-12 text-[#E5C158] mb-3" />
+                        <p className="font-display text-2xl font-semibold mb-1">
+                          {state.video.pilgrimName} ({state.video.city})
+                        </p>
+                        <p className="text-xs text-stone-200 mb-2">
+                          {state.video.packageLabel} · Duration {state.video.duration}
+                        </p>
+                        <p className="text-xs text-stone-300">
+                          Full video transcript below
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 px-1">
+                  <span className="font-semibold text-slate-900">
+                    {state.video.pilgrimName} · {state.video.city}
+                  </span>
+                  <span>
+                    {state.video.packageLabel} · {state.video.duration}
+                  </span>
+                </div>
+                <div className="bg-[#FAFAF8] border border-stone-200 rounded-xl p-5">
+                  <p className="text-xs font-semibold text-[#0B3B2E] mb-2">
+                    Pilgrim Video Transcript
                   </p>
-                  <p className="text-xs text-stone-200 mb-3">
-                    {state.video.packageLabel} · Duration {state.video.duration}
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    &ldquo;{state.video.fullTranscript}&rdquo;
                   </p>
                 </div>
               </div>
-              <div className="bg-[#FAFAF8] border border-stone-200 rounded-xl p-5">
-                <p className="text-xs font-semibold text-[#0B3B2E] mb-2">
-                  Pilgrim Video Transcript
-                </p>
-                <p className="text-sm text-slate-700 leading-relaxed">
-                  "{state.video.fullTranscript}"
-                </p>
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Quote Submission Email Confirmation Preview */}
           {state.type === 'quoteEmail' && (

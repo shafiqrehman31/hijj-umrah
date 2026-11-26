@@ -36,6 +36,7 @@ import {
   DEFAULT_SITE_CONTENT,
 } from '../data/defaultSiteData';
 import { replaceBrandAndDomainDeep } from '../utils/brandReplacer';
+import { formatWhatsAppDigits, replaceContactDetailsDeep } from '../utils/contactUtils';
 import {
   AdminNotification,
   AdminSettings,
@@ -155,6 +156,7 @@ interface FirebaseContextValue {
     newDomainName: string,
     syncEmailAndSocials?: boolean
   ) => Promise<void>;
+  updateContactDetails: (nextContact: SiteCmsData['contact']) => Promise<void>;
   seedDefaultsNow: () => Promise<void>;
 }
 
@@ -534,7 +536,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       '',
       'One of our senior UK Umrah specialists is reviewing live flight fares and Makkah/Madinah hotel availability for your exact dates. You will receive your bespoke Best-Price itinerary shortly.',
       '',
-      `Need immediate assistance? Call ${siteContent.contact.phone} or WhatsApp +${siteContent.contact.whatsappNumber}.`,
+      `Need immediate assistance? Call ${siteContent.contact.phone} or WhatsApp +${formatWhatsAppDigits(siteContent.contact.whatsappNumber)}.`,
       '',
       'Warm regards,',
       `${activeBrand} UK Pilgrim Advisory Desk`,
@@ -1032,6 +1034,54 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const updateContactDetails = async (nextContact: SiteCmsData['contact']) => {
+    const prevContact = siteContent.contact;
+    const cleanedContact: SiteCmsData['contact'] = {
+      ...prevContact,
+      ...nextContact,
+      phone: nextContact.phone.trim(),
+      whatsappNumber: formatWhatsAppDigits(nextContact.whatsappNumber),
+      email: nextContact.email.trim(),
+      officeAddress: nextContact.officeAddress.trim(),
+      atolNumber: nextContact.atolNumber.trim() || prevContact.atolNumber,
+      aboutTagline: nextContact.aboutTagline.trim(),
+      copyrightText: nextContact.copyrightText.trim(),
+    };
+
+    const updatedPages = replaceContactDetailsDeep(
+      siteContent.pages,
+      prevContact,
+      cleanedContact
+    );
+
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'siteContent', 'contact'), {
+      sectionKey: 'contact',
+      payload: cleanedContact,
+      updatedAt: serverTimestamp(),
+    });
+    batch.set(doc(db, 'siteContent', 'pages'), {
+      sectionKey: 'pages',
+      payload: updatedPages,
+      updatedAt: serverTimestamp(),
+    });
+
+    try {
+      await batch.commit();
+      setSiteContent((prev) => {
+        const next: SiteCmsData = {
+          ...prev,
+          contact: cleanedContact,
+          pages: updatedPages,
+        };
+        writeLocalCache(CMS_CACHE_KEY, next);
+        return next;
+      });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'siteContent/contact');
+    }
+  };
+
   const seedDefaultsNow = async () => {
     await seedDefaultsInternal();
   };
@@ -1072,6 +1122,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         verifyAdminSecondaryLogin,
         updateAdminCredentials,
         updateGlobalBrandAndDomain,
+        updateContactDetails,
         seedDefaultsNow,
       }}
     >

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Mail, MapPin, Phone, ShieldCheck } from 'lucide-react';
+import { Mail, MapPin, MessageCircle, Phone, ShieldCheck } from 'lucide-react';
 import { useFirebase } from '../context/FirebaseContext';
+import { buildWhatsAppUrl, formatWhatsAppDigits } from '../utils/contactUtils';
 import { SocialIcons } from './SocialIcons';
 
 interface FooterProps {
@@ -234,6 +235,20 @@ export const Footer: React.FC<FooterProps> = ({ onAction }) => {
                 >
                   <Phone className="w-4 h-4 text-[#C59B27] shrink-0" />
                   <span>{contact.phone}</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={buildWhatsAppUrl(
+                    contact.whatsappNumber,
+                    `Assalamu Alaikum ${contact.brandName}, I have a question about your Umrah & Hajj packages.`
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 hover:text-[#4ade80] font-mono-num"
+                >
+                  <MessageCircle className="w-4 h-4 text-[#4ade80] shrink-0" />
+                  <span>+{formatWhatsAppDigits(contact.whatsappNumber)}</span>
                 </a>
               </li>
               <li>

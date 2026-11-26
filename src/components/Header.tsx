@@ -4,11 +4,13 @@ import {
   ChevronRight,
   Mail,
   Menu,
+  MessageCircle,
   Phone,
   X,
 } from 'lucide-react';
 import { useFirebase } from '../context/FirebaseContext';
 import { NavItem, NavSubItem } from '../types';
+import { buildWhatsAppUrl } from '../utils/contactUtils';
 import { SocialIcons } from './SocialIcons';
 
 interface HeaderProps {
@@ -48,13 +50,25 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
             <SocialIcons links={siteContent.branding.socialLinks} variant="dark" />
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-5">
             <a
               href={`tel:${siteContent.contact.phone.replace(/\s+/g, '')}`}
               className="inline-flex items-center gap-1.5 hover:text-[#E5C158] transition-colors whitespace-nowrap font-mono-num"
             >
               <Phone className="w-3.5 h-3.5 text-[#C59B27]" />
               <span>{siteContent.contact.phone}</span>
+            </a>
+            <a
+              href={buildWhatsAppUrl(
+                siteContent.contact.whatsappNumber,
+                `Assalamu Alaikum ${siteContent.contact.brandName}, I would like to inquire about Umrah & Hajj packages.`
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 hover:text-[#4ade80] transition-colors whitespace-nowrap"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-[#4ade80]" />
+              <span>WhatsApp</span>
             </a>
             <a
               href={`mailto:${siteContent.contact.email}`}
@@ -221,6 +235,18 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <Phone className="w-3.5 h-3.5 text-[#C59B27]" />
                   {siteContent.contact.phone}
+                </a>
+                <a
+                  href={buildWhatsAppUrl(
+                    siteContent.contact.whatsappNumber,
+                    `Assalamu Alaikum ${siteContent.contact.brandName}, I would like to inquire about Umrah & Hajj packages.`
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[#166534] font-medium"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-[#166534]" />
+                  WhatsApp
                 </a>
                 <a
                   href={`mailto:${siteContent.contact.email}`}

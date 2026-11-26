@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { TravelPackage } from '../types';
 import { useFirebase } from '../context/FirebaseContext';
+import { buildWhatsAppUrl } from '../utils/contactUtils';
 
 interface PackageCardProps {
   pkg: TravelPackage;
@@ -20,10 +21,10 @@ export const PackageCard: React.FC<PackageCardProps> = ({ pkg, onSelectDetails }
   const [imgError, setImgError] = useState(false);
 
   const cleanPhone = siteContent.contact.phone.replace(/\s+/g, '');
-  const waText = encodeURIComponent(
+  const waUrl = buildWhatsAppUrl(
+    siteContent.contact.whatsappNumber,
     `Assalamu Alaikum ${siteContent.contact.brandName}, I am interested in "${pkg.title}" (£${pkg.priceGbp}pp). Please share details.`
   );
-  const waUrl = `https://wa.me/${siteContent.contact.whatsappNumber}?text=${waText}`;
 
   const isSoldOut = pkg.availableSlots <= 0;
 

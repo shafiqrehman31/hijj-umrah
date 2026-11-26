@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Building2,
   CheckCircle2,
@@ -46,6 +46,20 @@ export const PackageBookingModal: React.FC<PackageBookingModalProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const modalDateInputRef = useRef<HTMLInputElement>(null);
+
+  const openModalDatePicker = () => {
+    const input = modalDateInputRef.current;
+    if (!input) return;
+    input.focus();
+    try {
+      if (typeof input.showPicker === 'function') {
+        input.showPicker();
+      }
+    } catch {
+      // Native overlay handles fallback
+    }
+  };
 
   if (!pkg) return null;
 
@@ -280,11 +294,13 @@ export const PackageBookingModal: React.FC<PackageBookingModalProps> = ({
                     Preferred Departure Date
                   </label>
                   <input
+                    ref={modalDateInputRef}
                     type="date"
                     required
                     value={departureDate}
                     onChange={(e) => setDepartureDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-stone-300 text-sm focus:outline-none focus:border-[#0B3B2E]"
+                    onClick={openModalDatePicker}
+                    className="date-input-full-click w-full px-3 py-2 rounded-lg border border-stone-300 text-sm focus:outline-none focus:border-[#0B3B2E] cursor-pointer"
                   />
                 </div>
               </div>

@@ -11,9 +11,13 @@ import {
   KeyRound,
   LayoutDashboard,
   Lock,
+  Mail,
+  MapPin,
   Menu as MenuIcon,
+  MessageCircle,
   MessageSquareQuote,
   Package as PackageIcon,
+  Phone,
   Plus,
   RefreshCw,
   Save,
@@ -46,6 +50,7 @@ import {
 
 import { AdminVideoManager } from './AdminVideoManager';
 import { AirlineLogo } from './AirlineLogo';
+import { formatWhatsAppDigits } from '../utils/contactUtils';
 
 interface AdminDashboardProps {
   onExitAdmin: () => void;
@@ -61,6 +66,7 @@ type AdminTab =
   | 'pages'
   | 'menus'
   | 'sections'
+  | 'contact'
   | 'branding'
   | 'security';
 
@@ -112,6 +118,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     verifyAdminSecondaryLogin,
     updateAdminCredentials,
     updateGlobalBrandAndDomain,
+    updateContactDetails,
     seedDefaultsNow,
   } = useFirebase();
 
@@ -158,6 +165,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [videoDraft, setVideoDraft] = useState<SiteCmsData['videoSection']>(
     siteContent.videoSection
   );
+
+  // Contact & Office details draft state
+  const [contactDraft, setContactDraft] = useState<SiteCmsData['contact']>(
+    siteContent.contact
+  );
+  const [savingContact, setSavingContact] = useState<boolean>(false);
 
   // CMS Sections state
   const [cmsSectionKey, setCmsSectionKey] = useState<keyof SiteCmsData>('hero');
@@ -406,6 +419,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 { id: 'pages', label: 'Pages CMS (All Pages)', icon: Globe },
                 { id: 'menus', label: 'Menus & Sub-Navs', icon: MenuIcon },
                 { id: 'sections', label: 'Home Sections CMS', icon: FileText },
+                { id: 'contact', label: 'Contact, WhatsApp & Address', icon: Phone },
                 { id: 'branding', label: 'Site Name, Domain & Logo', icon: ImageIcon },
                 { id: 'security', label: 'Admin Security & Link', icon: KeyRound },
               ] as const
@@ -419,6 +433,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   onClick={() => {
                     setActiveTab(tab.id);
                     if (tab.id === 'sections') setCmsDraft(siteContent);
+                    if (tab.id === 'contact') setContactDraft(siteContent.contact);
                     if (tab.id === 'videos') setVideoDraft(siteContent.videoSection);
                     if (tab.id === 'menus') setNavDraft(navigation.items);
                     if (tab.id === 'pages') {
@@ -2458,7 +2473,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <button
                 type="button"
                 onClick={async () => {
-                  await saveSiteSection(cmsSectionKey, cmsDraft[cmsSectionKey]);
+                  if (cmsSectionKey === 'contact') {
+                    await updateContactDetails(cmsDraft.contact);
+                  } else {
+                    await saveSiteSection(cmsSectionKey, cmsDraft[cmsSectionKey]);
+                  }
                   showToast(`Saved "${cmsSectionKey}" section live to Firestore!`);
                 }}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#0B3B2E] text-white text-xs font-semibold hover:bg-[#082A21] cursor-pointer"
@@ -2468,6 +2487,176 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </button>
             </div>
           </div>
+        )}
+
+        {/* 7B. CONTACT, WHATSAPP, PHONE, EMAIL & OFFICE ADDRESS */}
+        {activeTab === 'contact' && (
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setSavingContact(true);
+              try {
+                await updateContactDetails(contactDraft);
+                showToast(
+                  'Phone, WhatsApp, Email & Office Address updated everywhere on the website!'
+                );
+              } finally {
+                setSavingContact(false);
+              }
+            }}
+            className="bg-white border border-stone-200 rounded-xl p-6 space-y-6 max-w-4xl"
+          >
+            <div className="border-b border-stone-100 pb-4">
+              <p className="text-xs font-semibold tracking-wider text-[#9A7414] uppercase mb-1">
+                Live Contact Sync
+              </p>
+              <h3 className="font-display text-2xl font-semibold text-slate-900">
+                WhatsApp, Phone, Email &amp; Office Address
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Changes saved here automatically update your Website Header Bar, Mobile Menu, Package Cards (Call &amp; WhatsApp buttons), Contact Us &amp; Service Pages, Footer Head Office, and Quote Emails.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
+                  <MessageCircle className="w-3.5 h-3.5 text-[#166534]" />
+                  <span>WhatsApp Number</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={contactDraft.whatsappNumber}
+                  onChange={(e) =>
+                    setContactDraft({ ...contactDraft, whatsappNumber: e.target.value })
+                  }
+                  placeholder="e.g. 447700900123 or +44 7700 900123"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-stone-300 text-sm font-mono focus:outline-none focus:border-[#0B3B2E]"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Active WhatsApp link:{' '}
+                  <span className="font-mono text-[#166534]">
+                    wa.me/{formatWhatsAppDigits(contactDraft.whatsappNumber) || '—'}
+                  </span>
+                </p>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
+                  <Phone className="w-3.5 h-3.5 text-[#0B3B2E]" />
+                  <span>Phone Number</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={contactDraft.phone}
+                  onChange={(e) =>
+                    setContactDraft({ ...contactDraft, phone: e.target.value })
+                  }
+                  placeholder="e.g. 020 7946 0821"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-stone-300 text-sm font-mono focus:outline-none focus:border-[#0B3B2E]"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Updates Top Header Bar, Package Call buttons, Contact page &amp; Footer.
+                </p>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
+                  <Mail className="w-3.5 h-3.5 text-[#0B3B2E]" />
+                  <span>Email Address</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={contactDraft.email}
+                  onChange={(e) =>
+                    setContactDraft({ ...contactDraft, email: e.target.value })
+                  }
+                  placeholder="info@hidayahtravels.co.uk"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-stone-300 text-sm focus:outline-none focus:border-[#0B3B2E]"
+                />
+              </div>
+
+              <div>
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#9A7414]" />
+                  <span>ATOL Licence Number</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={contactDraft.atolNumber}
+                  onChange={(e) =>
+                    setContactDraft({ ...contactDraft, atolNumber: e.target.value })
+                  }
+                  placeholder="ATOL 11842"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-stone-300 text-sm focus:outline-none focus:border-[#0B3B2E]"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#0B3B2E]" />
+                  <span>Office Address</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={contactDraft.officeAddress}
+                  onChange={(e) =>
+                    setContactDraft({ ...contactDraft, officeAddress: e.target.value })
+                  }
+                  placeholder="142 Whitechapel Road, London E1 1JE, United Kingdom"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-stone-300 text-sm focus:outline-none focus:border-[#0B3B2E]"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Footer About Tagline
+                </label>
+                <textarea
+                  rows={2}
+                  value={contactDraft.aboutTagline}
+                  onChange={(e) =>
+                    setContactDraft({ ...contactDraft, aboutTagline: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2 rounded-lg border border-stone-300 text-sm focus:outline-none focus:border-[#0B3B2E]"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Footer Copyright Notice
+                </label>
+                <input
+                  type="text"
+                  value={contactDraft.copyrightText}
+                  onChange={(e) =>
+                    setContactDraft({ ...contactDraft, copyrightText: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2 rounded-lg border border-stone-300 text-sm focus:outline-none focus:border-[#0B3B2E]"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-stone-100">
+              <button
+                type="submit"
+                disabled={savingContact}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#0B3B2E] text-white text-xs font-semibold hover:bg-[#082A21] cursor-pointer disabled:opacity-60"
+              >
+                <Save className="w-4 h-4" />
+                <span>
+                  {savingContact
+                    ? 'Updating Website Contact Details...'
+                    : 'Save & Update Front-End Everywhere'}
+                </span>
+              </button>
+            </div>
+          </form>
         )}
 
         {/* 8. SITE NAME, DOMAIN, LOGO, FAVICON & SOCIAL MEDIA LINKS */}

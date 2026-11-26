@@ -71,3 +71,21 @@
     animation: none;
   }
 }
+
+/* Make entire date field open native calendar popup when clicked anywhere */
+.date-input-full-click {
+  position: relative;
+  cursor: pointer;
+}
+
+.date-input-full-click::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+

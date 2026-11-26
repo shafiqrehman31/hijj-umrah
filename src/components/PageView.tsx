@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,6 +12,7 @@ import {
 import { QuoteSubmissionResult, useFirebase } from '../context/FirebaseContext';
 import { UK_AIRPORTS } from '../data/defaultSiteData';
 import { CmsPage, TravelPackage } from '../types';
+import { buildWhatsAppUrl, formatWhatsAppDigits } from '../utils/contactUtils';
 import { PackageCard } from './PackageCard';
 import { SocialIcons } from './SocialIcons';
 
@@ -40,6 +41,20 @@ export const PageView: React.FC<PageViewProps> = ({
   const [adults, setAdults] = useState(2);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const pageDateInputRef = useRef<HTMLInputElement>(null);
+
+  const openPageDatePicker = () => {
+    const input = pageDateInputRef.current;
+    if (!input) return;
+    input.focus();
+    try {
+      if (typeof input.showPicker === 'function') {
+        input.showPicker();
+      }
+    } catch {
+      // Fallback handled by CSS overlay
+    }
+  };
 
   // Resolve matching live packages for this page
   const getPagePackages = (): TravelPackage[] => {
@@ -85,9 +100,10 @@ export const PageView: React.FC<PageViewProps> = ({
 
   const matchingPackages = getPagePackages();
   const cleanPhone = contact.phone.replace(/\s+/g, '');
-  const waUrl = `https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(
+  const waUrl = buildWhatsAppUrl(
+    contact.whatsappNumber,
     `Assalamu Alaikum ${contact.brandName}, I would like information regarding ${page.title}.`
-  )}`;
+  );
 
   const handleInquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -300,11 +316,13 @@ export const PageView: React.FC<PageViewProps> = ({
                         Preferred Departure Date
                       </label>
                       <input
+                        ref={pageDateInputRef}
                         type="date"
                         required
                         value={departureDate}
                         onChange={(e) => setDepartureDate(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-lg border border-stone-300 text-sm"
+                        onClick={openPageDatePicker}
+                        className="date-input-full-click w-full px-3.5 py-2.5 rounded-lg border border-stone-300 text-sm cursor-pointer"
                       />
                     </div>
                     <div>
@@ -355,7 +373,7 @@ export const PageView: React.FC<PageViewProps> = ({
                 Speak With a UK Specialist
               </h3>
               <p className="text-xs text-stone-200 leading-relaxed">
-                Get instant availability, room-view upgrades, and customised family pricing from our London Whitechapel desk.
+                Get instant availability, room-view upgrades, and customised family pricing from our {contact.brandName} UK advisory desk.
               </p>
 
               <div className="space-y-3 text-sm pt-2 border-t border-white/15">
@@ -365,6 +383,15 @@ export const PageView: React.FC<PageViewProps> = ({
                 >
                   <Phone className="w-4 h-4 text-[#E5C158] shrink-0" />
                   <span>{contact.phone}</span>
+                </a>
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 text-stone-200 hover:text-[#4ade80] font-mono-num"
+                >
+                  <MessageCircle className="w-4 h-4 text-[#4ade80] shrink-0" />
+                  <span>+{formatWhatsAppDigits(contact.whatsappNumber)} (WhatsApp)</span>
                 </a>
                 <a
                   href={`mailto:${contact.email}`}

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   ArrowRight,
   Calendar,
   CheckCircle2,
+  ChevronDown,
   Mail,
   Phone,
   PlaneTakeoff,
@@ -38,6 +39,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [phone, setPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const dateInputRef = useRef<HTMLInputElement>(null);
+
+  const openDatePicker = () => {
+    const input = dateInputRef.current;
+    if (!input) return;
+    input.focus();
+    try {
+      if (typeof input.showPicker === 'function') {
+        input.showPicker();
+      }
+    } catch {
+      // Native ::-webkit-calendar-picker-indicator overlay opens calendar on WebKit/Blink
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,18 +181,31 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-medium text-stone-200 mb-1.5">
+                  <label
+                    htmlFor="hero-departure-date"
+                    className="block text-xs font-medium text-stone-200 mb-1.5"
+                  >
                     Departure Date
                   </label>
-                  <div className="relative">
-                    <Calendar className="w-4 h-4 text-[#E5C158] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <div
+                    onClick={openDatePicker}
+                    className="relative cursor-pointer group"
+                  >
+                    <Calendar className="w-4 h-4 text-[#E5C158] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
                     <input
+                      id="hero-departure-date"
+                      ref={dateInputRef}
                       type="date"
                       required
                       value={departureDate}
                       onChange={(e) => setDepartureDate(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-white/12 border border-white/25 text-white text-sm focus:outline-none focus:border-[#E5C158] [color-scheme:dark]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDatePicker();
+                      }}
+                      className="date-input-full-click w-full pl-9 pr-8 py-2.5 rounded-lg bg-white/12 border border-white/25 group-hover:border-[#E5C158]/70 text-white text-sm focus:outline-none focus:border-[#E5C158] [color-scheme:dark] cursor-pointer"
                     />
+                    <ChevronDown className="w-4 h-4 text-stone-300 group-hover:text-[#E5C158] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none z-10 transition-colors" />
                   </div>
                 </div>
 

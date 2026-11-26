@@ -84,6 +84,7 @@ export interface CreateBookingInput {
 
 interface FirebaseContextValue {
   authReady: boolean;
+  cmsReady: boolean;
   currentUser: User | null;
   isAdminUser: boolean;
   signInWithGoogle: () => Promise<User | null>;
@@ -159,13 +160,69 @@ interface FirebaseContextValue {
 
 const FirebaseContext = createContext<FirebaseContextValue | null>(null);
 
+const CMS_CACHE_KEY = 'hidayah_cms_cache_v1';
+const PKGS_CACHE_KEY = 'hidayah_pkgs_cache_v1';
+const NAV_CACHE_KEY = 'hidayah_nav_cache_v1';
+
+function readLocalCache<T>(key: string, fallback: T): { data: T; hit: boolean } {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return { data: fallback, hit: false };
+    }
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return { data: fallback, hit: false };
+    const parsed = JSON.parse(raw) as T;
+    if (!parsed || typeof parsed !== 'object') return { data: fallback, hit: false };
+    return { data: parsed, hit: true };
+  } catch {
+    return { data: fallback, hit: false };
+  }
+}
+
+function writeLocalCache(key: string, value: unknown): void {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    }
+  } catch {
+    // Ignore storage quota / private-mode errors
+  }
+}
+
 export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const initialCmsCache = useMemo(() => readLocalCache<SiteCmsData>(CMS_CACHE_KEY, DEFAULT_SITE_CONTENT), []);
+  const initialPkgsCache = useMemo(() => readLocalCache<TravelPackage[]>(PKGS_CACHE_KEY, DEFAULT_PACKAGES), []);
+  const initialNavCache = useMemo(() => readLocalCache<NavigationConfig>(NAV_CACHE_KEY, DEFAULT_NAVIGATION), []);
+
   const [authReady, setAuthReady] = useState(false);
+  const [cmsReady, setCmsReady] = useState<boolean>(initialCmsCache.hit);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  const [packages, setPackages] = useState<TravelPackage[]>(DEFAULT_PACKAGES);
-  const [siteContent, setSiteContent] = useState<SiteCmsData>(DEFAULT_SITE_CONTENT);
-  const [navigation, setNavigation] = useState<NavigationConfig>(DEFAULT_NAVIGATION);
+  const [packages, setPackages] = useState<TravelPackage[]>(
+    Array.isArray(initialPkgsCache.data) && initialPkgsCache.data.length > 0
+      ? initialPkgsCache.data
+      : DEFAULT_PACKAGES
+  );
+  const [siteContent, setSiteContent] = useState<SiteCmsData>({
+    ...DEFAULT_SITE_CONTENT,
+    ...initialCmsCache.data,
+    contact: {
+      ...DEFAULT_SITE_CONTENT.contact,
+      ...(initialCmsCache.data?.contact || {}),
+    },
+    branding: {
+      ...DEFAULT_SITE_CONTENT.branding,
+      ...(initialCmsCache.data?.branding || {}),
+      socialLinks: {
+        ...DEFAULT_SITE_CONTENT.branding.socialLinks,
+        ...(initialCmsCache.data?.branding?.socialLinks || {}),
+      },
+    },
+    pages: initialCmsCache.data?.pages?.items?.length
+      ? initialCmsCache.data.pages
+      : DEFAULT_SITE_CONTENT.pages,
+  });
+  const [navigation, setNavigation] = useState<NavigationConfig>(initialNavCache.data);
 
   const [userBookings, setUserBookings] = useState<BookingRecord[]>([]);
   const [userPayments, setUserPayments] = useState<PaymentRecord[]>([]);
@@ -180,6 +237,13 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (!currentUser || !currentUser.emailVerified) return false;
     return currentUser.email === BOOTSTRAPPED_ADMIN_EMAIL;
   }, [currentUser]);
+
+  // Safety timeout so first uncached cold load never stalls if Firestore is offline
+  useEffect(() => {
+    if (cmsReady) return;
+    const timer = window.setTimeout(() => setCmsReady(true), 2200);
+    return () => window.clearTimeout(timer);
+  }, [cmsReady]);
 
   // 1. Test connection + Auth state listener
   useEffect(() => {
@@ -202,6 +266,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             .map((d) => ({ ...(d.data() as TravelPackage), id: d.id }))
             .sort((a, b) => (a.displayOrder ?? 99) - (b.displayOrder ?? 99));
           setPackages(loaded);
+          writeLocalCache(PKGS_CACHE_KEY, loaded);
         } else {
           setPackages(DEFAULT_PACKAGES);
         }
@@ -241,19 +306,22 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     domainName:
                       (data.payload as Partial<SiteCmsData['contact']>).domainName ||
                       prev.contact.domainName ||
-                      'aqdastravel.co.uk',
+                      'hidayahtravels.co.uk',
                   };
                 } else {
                   (next as Record<string, unknown>)[data.sectionKey] = data.payload;
                 }
               }
             });
+            writeLocalCache(CMS_CACHE_KEY, next);
             return next;
           });
         }
+        setCmsReady(true);
       },
       (err) => {
         console.warn('SiteContent snapshot fallback:', err.message);
+        setCmsReady(true);
       }
     );
     return () => unsub();
@@ -265,7 +333,9 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       doc(db, 'navigation', 'main'),
       (snap) => {
         if (snap.exists()) {
-          setNavigation(snap.data() as NavigationConfig);
+          const navData = snap.data() as NavigationConfig;
+          setNavigation(navData);
+          writeLocalCache(NAV_CACHE_KEY, navData);
         }
       },
       (err) => {
@@ -447,8 +517,8 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const quoteId = `quote-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const notifId = `admn-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
-    const activeBrand = siteContent.contact.brandName || 'Aqdas Travel';
-    const activeDomain = siteContent.contact.domainName || 'aqdastravel.co.uk';
+    const activeBrand = siteContent.contact.brandName || 'Hidayah Travels';
+    const activeDomain = siteContent.contact.domainName || 'hidayahtravels.co.uk';
     const emailSubject = `Your ${activeBrand} UK Umrah & Hajj Quote Request (${input.departureAirport})`;
     const emailBody = [
       `Assalamu Alaikum ${input.fullName},`,
@@ -756,6 +826,11 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         payload: serializeSectionPayload(payload),
         updatedAt: serverTimestamp(),
       });
+      setSiteContent((prev) => {
+        const next = { ...prev, [sectionKey]: payload };
+        writeLocalCache(CMS_CACHE_KEY, next);
+        return next;
+      });
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, `siteContent/${id}`);
     }
@@ -767,6 +842,8 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         ...config,
         updatedAt: serverTimestamp(),
       });
+      setNavigation(config);
+      writeLocalCache(NAV_CACHE_KEY, config);
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'navigation/main');
     }
@@ -891,8 +968,8 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     newDomainName: string,
     syncEmailAndSocials = true
   ) => {
-    const oldBrand = siteContent.contact.brandName || 'Aqdas Travel';
-    const oldDomain = siteContent.contact.domainName || 'aqdastravel.co.uk';
+    const oldBrand = siteContent.contact.brandName || 'Hidayah Travels';
+    const oldDomain = siteContent.contact.domainName || 'hidayahtravels.co.uk';
     const cleanBrand = newBrandName.trim() || oldBrand;
     const cleanDomain =
       newDomainName.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '') || oldDomain;
@@ -948,6 +1025,8 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       await batch.commit();
       setSiteContent(updatedSiteContent);
       setNavigation(updatedNav);
+      writeLocalCache(CMS_CACHE_KEY, updatedSiteContent);
+      writeLocalCache(NAV_CACHE_KEY, updatedNav);
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'siteContent/globalBrandUpdate');
     }
@@ -961,6 +1040,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     <FirebaseContext.Provider
       value={{
         authReady,
+        cmsReady,
         currentUser,
         isAdminUser,
         signInWithGoogle,

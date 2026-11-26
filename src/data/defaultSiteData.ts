@@ -613,7 +613,7 @@ export const DEFAULT_SITE_CONTENT: SiteCmsData = {
     title: 'Choose Your Umrah Month',
     subtitle: 'Year-Round Availability · Expert Guidance · Hassle-Free Bookings',
     ratingSummary: '4.9/5 Rating · 4.9★ Trustpilot · 214+ Reviews · Best Price Guarantee',
-    whyTitle: 'Why Choose Aqdas Travel for Your Umrah Journey?',
+    whyTitle: 'Why Choose Hidayah Travels for Your Umrah Journey?',
     whyItems: [
       { id: 'w1', title: '24/7 Support', description: 'Dedicated UK & Saudi ground teams', iconKey: 'phone' },
       { id: 'w2', title: 'Tailored Packages', description: 'Custom nights, rooms & UK airports', iconKey: 'target' },
@@ -648,7 +648,7 @@ export const DEFAULT_SITE_CONTENT: SiteCmsData = {
   storiesSection: {
     title: 'Real Stories from Our Blessed Travelers',
     description:
-      'Discover authentic experiences shared by pilgrims who have completed their sacred journeys with us. Their heartfelt reflections reveal how Aqdas Travel transformed their Umrah into peaceful, spiritually fulfilling experiences filled with cherished memories.',
+      'Discover authentic experiences shared by pilgrims who have completed their sacred journeys with us. Their heartfelt reflections reveal how Hidayah Travels transformed their Umrah into peaceful, spiritually fulfilling experiences filled with cherished memories.',
     ctaLabel: 'Read Customer Stories',
     imageUrl: IMG_PILGRIM_STORY,
     stories: [
@@ -667,7 +667,7 @@ export const DEFAULT_SITE_CONTENT: SiteCmsData = {
         city: 'Ilford, London',
         packageTaken: '7 Nights Royal Clock Tower 5 Star Umrah',
         quote:
-          'Aqdas Travel beat two rival London quotes and still upgraded our Madinah transfer to the Haramain train. Having live visa tracking gave our whole family peace of mind.',
+          'Hidayah Travels beat two rival London quotes and still upgraded our Madinah transfer to the Haramain train. Having live visa tracking gave our whole family peace of mind.',
         rating: 5,
       },
       {
@@ -694,7 +694,7 @@ export const DEFAULT_SITE_CONTENT: SiteCmsData = {
         thumbnailUrl: IMG_MAKKAH_HOTEL,
         quoteSummary: 'Seamless ATOL-protected family booking from Heathrow with zero waiting at Jeddah airport.',
         fullTranscript:
-          'Assalamu Alaikum. My wife, mother, and I travelled with Aqdas Travel from Heathrow last month. Our visas arrived within 48 hours of passport submission, our driver met us right outside King Abdulaziz Airport, and Fairmont Clock Tower was genuinely steps away from the Mataf. May Allah reward the Aqdas team.',
+          'Assalamu Alaikum. My wife, mother, and I travelled with Hidayah Travels from Heathrow last month. Our visas arrived within 48 hours of passport submission, our driver met us right outside King Abdulaziz Airport, and Fairmont Clock Tower was genuinely steps away from the Mataf. May Allah reward the Hidayah team.',
       },
       {
         id: 'vid-2',
@@ -705,7 +705,7 @@ export const DEFAULT_SITE_CONTENT: SiteCmsData = {
         thumbnailUrl: IMG_RAMADAN_HARAM,
         quoteSummary: 'Spending Laylatul Qadr facing Masjid al-Haram with full Suhoor & Iftar arrangements.',
         fullTranscript:
-          'Ramadan in Makkah can feel overwhelming to plan, especially with flights and Rawdah permits. Aqdas Travel arranged our entire Last 10 Nights itinerary, kept us updated via automated visa reminders, and checked on us on arrival in Madinah. Highly recommended for UK families.',
+          'Ramadan in Makkah can feel overwhelming to plan, especially with flights and Rawdah permits. Hidayah Travels arranged our entire Last 10 Nights itinerary, kept us updated via automated visa reminders, and checked on us on arrival in Madinah. Highly recommended for UK families.',
       },
       {
         id: 'vid-3',
@@ -716,19 +716,19 @@ export const DEFAULT_SITE_CONTENT: SiteCmsData = {
         thumbnailUrl: IMG_PILGRIM_STORY,
         quoteSummary: 'Our English-speaking scholar guide made our very first Umrah deeply spiritual and calm.',
         fullTranscript:
-          'Because it was our first Umrah, we were nervous about Ihram rules and Ziyarat timings. Aqdas Travel provided a full English-speaking guide in Makkah and Madinah who explained every Sunnah and took our group to Masjid Quba and Uhud comfortably.',
+          'Because it was our first Umrah, we were nervous about Ihram rules and Ziyarat timings. Hidayah Travels provided a full English-speaking guide in Makkah and Madinah who explained every Sunnah and took our group to Masjid Quba and Uhud comfortably.',
       },
     ],
   },
   faqSection: {
-    title: 'Why 10,000+ UK Pilgrims Choose Aqdas Travel',
+    title: 'Why 10,000+ UK Pilgrims Choose Hidayah Travels',
     subtitle: 'Clear answers on ATOL protection, Saudi Umrah visas, UK regional departures, and flexible payments.',
     faqs: [
       {
         id: 'faq-1',
-        question: 'Are all Aqdas Travel Umrah and Hajj packages ATOL protected?',
+        question: 'Are all Hidayah Travels Umrah and Hajj packages ATOL protected?',
         answer:
-          'Yes. Every flight-inclusive package booked through Aqdas Travel UK is financially protected under our ATOL licence (ATOL 11842) issued by the UK Civil Aviation Authority, giving you complete protection from deposit to return.',
+          'Yes. Every flight-inclusive package booked through Hidayah Travels UK is financially protected under our ATOL licence (ATOL 11842) issued by the UK Civil Aviation Authority, giving you complete protection from deposit to return.',
       },
       {
         id: 'faq-2',
@@ -758,26 +758,26 @@ export const DEFAULT_SITE_CONTENT: SiteCmsData = {
   },
   articles: [],
   contact: {
-    brandName: 'Aqdas Travel',
-    domainName: 'aqdastravel.co.uk',
+    brandName: 'Hidayah Travels',
+    domainName: 'hidayahtravels.co.uk',
     phone: '020 7946 0821',
     whatsappNumber: '442079460821',
-    email: 'info@aqdastravel.co.uk',
+    email: 'info@hidayahtravels.co.uk',
     officeAddress: '142 Whitechapel Road, London E1 1JE, United Kingdom',
     atolNumber: 'ATOL 11842',
     aboutTagline:
       'ATOL-protected UK Hajj & Umrah specialists serving British families with transparent pricing, verified Haram hotels, and dedicated 24/7 spiritual & travel care.',
-    copyrightText: '© 2026 Aqdas Travel Ltd (UK). All Rights Reserved. ATOL Protected 11842.',
+    copyrightText: '© 2026 Hidayah Travels Ltd (UK). All Rights Reserved. ATOL Protected 11842.',
   },
   branding: {
     logoUrl: '',
     faviconUrl: '',
     socialLinks: {
-      facebook: 'https://facebook.com/aqdastraveluk',
-      instagram: 'https://instagram.com/aqdastraveluk',
-      youtube: 'https://youtube.com/@aqdastraveluk',
-      tiktok: 'https://tiktok.com/@aqdastraveluk',
-      twitterX: 'https://x.com/aqdastraveluk',
+      facebook: 'https://facebook.com/hidayahtravelsuk',
+      instagram: 'https://instagram.com/hidayahtravelsuk',
+      youtube: 'https://youtube.com/@hidayahtravelsuk',
+      tiktok: 'https://tiktok.com/@hidayahtravelsuk',
+      twitterX: 'https://x.com/hidayahtravelsuk',
     },
   },
   pages: {

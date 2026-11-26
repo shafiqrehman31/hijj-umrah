@@ -16,7 +16,7 @@ import { FirebaseProvider, useFirebase } from './context/FirebaseContext';
 import { TravelPackage } from './types';
 
 const MainAppShell: React.FC = () => {
-  const { siteContent, adminRouteSlug } = useFirebase();
+  const { siteContent, adminRouteSlug, cmsReady } = useFirebase();
 
   const parseHash = (hashStr: string, slug: string) => {
     const clean = hashStr.replace(/^#/, '');
@@ -59,7 +59,7 @@ const MainAppShell: React.FC = () => {
 
   // Dynamically sync browser Favicon & Page Title when updated in Admin Panel
   useEffect(() => {
-    const brand = siteContent.contact.brandName || 'Aqdas Travel';
+    const brand = siteContent.contact.brandName || 'Hidayah Travels';
     const titleStr = `${brand} — UK Hajj & Umrah Pilgrimage Agency`;
     document.title = titleStr;
     const ogTitle = document.querySelector("meta[property='og:title']");
@@ -163,6 +163,14 @@ const MainAppShell: React.FC = () => {
     );
   }
 
+  if (!cmsReady) {
+    return (
+      <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center">
+        <div className="w-9 h-9 rounded-full border-2 border-[#0B3B2E]/20 border-t-[#0B3B2E] animate-spin" />
+      </div>
+    );
+  }
+
   const activeCmsPage =
     routeState.mode === 'page'
       ? siteContent.pages.items.find((p) => p.slug === routeState.pageSlug) ||
@@ -217,7 +225,7 @@ const MainAppShell: React.FC = () => {
               onSelectDetails={(pkg) => setSelectedPkg(pkg)}
             />
 
-            {/* Section 8: Choose Your Umrah Month + Why Choose Aqdas Travel */}
+            {/* Section 8: Choose Your Umrah Month + Why Choose Us */}
             <MonthsAndWhySection
               onSelectMonth={(month) => openPage(`${month.toLowerCase()}-umrah`)}
             />

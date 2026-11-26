@@ -39,13 +39,13 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
   {
     slug: 'about-us',
     group: 'company',
-    eyebrow: 'About Aqdas Travel UK',
+    eyebrow: 'About Hidayah Travels UK',
     title: 'Serving British Pilgrims with Integrity & Care',
     subtitle:
       'ATOL-protected UK Hajj & Umrah specialists guiding over 10,000 pilgrims from across the United Kingdom to Makkah and Madinah.',
     heroImage: PILGRIM_STORY,
     intro:
-      'Founded in London with regional advisory desks serving Birmingham, Manchester, Glasgow, and Liverpool, Aqdas Travel was established to bring complete clarity, spiritual focus, and financial protection to UK pilgrimage travel.',
+      'Founded in London with regional advisory desks serving Birmingham, Manchester, Glasgow, and Liverpool, Hidayah Travels was established to bring complete clarity, spiritual focus, and financial protection to UK pilgrimage travel.',
     highlights: [
       'ATOL 11842 & IATA Accredited UK Tour Operator',
       'Direct hotel contracts in Clock Tower, Jabal Omar & Madinah Markazia',
@@ -70,7 +70,7 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
     slug: 'contact-us',
     group: 'company',
     eyebrow: 'UK Pilgrim Advisory Desk',
-    title: 'Contact Aqdas Travel UK',
+    title: 'Contact Hidayah Travels UK',
     subtitle:
       'Speak directly with our London-based Hajj & Umrah specialists by phone, WhatsApp, email, or in person at our Whitechapel office.',
     heroImage: HERO_MAKKAH,
@@ -79,7 +79,7 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
     highlights: [
       'London Head Office: 142 Whitechapel Road, London E1 1JE',
       'Direct Telephone: 020 7946 0821 (Mon–Sun, 9am – 9pm)',
-      'Email Advisory: info@aqdastravel.co.uk',
+      'Email Advisory: info@hidayahtravels.co.uk',
       '24/7 Emergency On-Ground Line for Active Pilgrims in KSA',
     ],
     sections: [
@@ -107,7 +107,7 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
       'Guided 3 Star and 5 Star UK Hajj packages with Nusuk readiness guidance, Mina & Arafat full-board camps, and experienced UK scholars.',
     heroImage: HERO_MAKKAH,
     intro:
-      'Performing Hajj is the journey of a lifetime. Aqdas Travel supports British pilgrims through Nusuk registration, pre-Hajj fiqh seminars, medical briefings, and seamless hotel & camp logistics.',
+      'Performing Hajj is the journey of a lifetime. Hidayah Travels supports British pilgrims through Nusuk registration, pre-Hajj fiqh seminars, medical briefings, and seamless hotel & camp logistics.',
     highlights: [
       '3 Star & 5 Star Shifting and Non-Shifting Hajj options',
       'Air-conditioned Mina & Arafat camp facilities with full catering',
@@ -189,7 +189,7 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
       'Browse our full range of ATOL-protected 3 Star, 4 Star & 5 Star Umrah packages departing year-round from UK airports.',
     heroImage: HERO_MAKKAH,
     intro:
-      'From affordable 7-night spiritual breaks to 14-night luxury family retreats, every Aqdas Travel Umrah package includes return flights, Saudi visa issuance, verified hotels, and private transfers.',
+      'From affordable 7-night spiritual breaks to 14-night luxury family retreats, every Hidayah Travels Umrah package includes return flights, Saudi visa issuance, verified hotels, and private transfers.',
     highlights: [
       'Flexible 7, 10, 14 & 21-night durations',
       'Double, Triple, Quad & Family Connecting Rooms',
@@ -416,7 +416,7 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
       'Nationwide departures across England and Scotland with ATOL financial protection and complete visa handling.',
     heroImage: HERO_MAKKAH,
     intro:
-      'Wherever you live in the United Kingdom, Aqdas Travel connects your nearest international airport directly to Makkah and Madinah.',
+      'Wherever you live in the United Kingdom, Hidayah Travels connects your nearest international airport directly to Makkah and Madinah.',
     highlights: [
       '8 UK departure airports covered',
       'Uniform ATOL 11842 protection on every booking',
@@ -661,7 +661,7 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
     subtitle: 'Found a lower ATOL-protected UK quote for the same hotels and dates? We will match or beat it.',
     heroImage: MAKKAH_HOTEL,
     intro:
-      'Thanks to direct wholesale hotel allocations in Makkah and Madinah and consolidated airline contracts, Aqdas Travel guarantees unbeatable UK pricing.',
+      'Thanks to direct wholesale hotel allocations in Makkah and Madinah and consolidated airline contracts, Hidayah Travels guarantees unbeatable UK pricing.',
     highlights: [
       'Applies to any genuine written UK ATOL-protected quote',
       'Same-day price review from our London contracting desk',
@@ -773,10 +773,10 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
     group: 'legal',
     eyebrow: 'UK GDPR & Data Compliance',
     title: 'Privacy Policy',
-    subtitle: 'How Aqdas Travel Ltd collects, protects, and processes pilgrim personal data under UK GDPR.',
+    subtitle: 'How Hidayah Travels Ltd collects, protects, and processes pilgrim personal data under UK GDPR.',
     heroImage: HERO_MAKKAH,
     intro:
-      'Aqdas Travel Ltd is committed to safeguarding your personal and passport data strictly for flight ticketing, hotel reservations, and Saudi Ministry of Hajj/Umrah visa issuance.',
+      'Hidayah Travels Ltd is committed to safeguarding your personal and passport data strictly for flight ticketing, hotel reservations, and Saudi Ministry of Hajj/Umrah visa issuance.',
     highlights: [
       'Compliant with the UK General Data Protection Regulation (UK GDPR) & Data Protection Act 2018',
       'Passport and travel data encrypted and never sold to third-party marketers',
@@ -791,7 +791,7 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
       {
         heading: '2. Data Retention & Security',
         content:
-          'Booking and ATOL compliance records are retained securely as required by UK Civil Aviation Authority regulations. For privacy requests, contact info@aqdastravel.co.uk.',
+          'Booking and ATOL compliance records are retained securely as required by UK Civil Aviation Authority regulations. For privacy requests, contact info@hidayahtravels.co.uk.',
       },
     ],
   },
@@ -803,7 +803,7 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
     subtitle: 'Standard booking terms, payment schedules, and ATOL package conditions for UK pilgrims.',
     heroImage: MAKKAH_HOTEL,
     intro:
-      'These Terms & Conditions govern all Hajj, Umrah, flight, hotel, and ground transfer bookings made with Aqdas Travel Ltd (Registered in England & Wales).',
+      'These Terms & Conditions govern all Hajj, Umrah, flight, hotel, and ground transfer bookings made with Hidayah Travels Ltd (Registered in England & Wales).',
     highlights: [
       'Bookings are confirmed upon deposit receipt and issuance of an ATOL Certificate',
       'Full balance is normally due 45 days prior to departure unless otherwise agreed',
@@ -818,7 +818,7 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
       {
         heading: '2. Visas & Entry Requirements',
         content:
-          'While Aqdas Travel processes Umrah/Tourist visas on your behalf, final entry approval remains at the discretion of Saudi Immigration authorities.',
+          'While Hidayah Travels processes Umrah/Tourist visas on your behalf, final entry approval remains at the discretion of Saudi Immigration authorities.',
       },
     ],
   },
@@ -852,7 +852,7 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
     subtitle: 'Information about essential session cookies and authentication storage used on this platform.',
     heroImage: RAMADAN_HARAM,
     intro:
-      'Aqdas Travel uses strictly necessary browser storage and authentication tokens to maintain booking sessions, remember selected package filters, and secure customer dashboards.',
+      'Hidayah Travels uses strictly necessary browser storage and authentication tokens to maintain booking sessions, remember selected package filters, and secure customer dashboards.',
     highlights: [
       'Zero intrusive third-party advertising trackers',
       'Essential security tokens for Google Sign-In & Firebase Firestore sessions',
@@ -906,7 +906,7 @@ export const DEFAULT_CMS_PAGES: CmsPage[] = [
       {
         heading: 'Escalation Contact',
         content:
-          'Please email customer.care@aqdastravel.co.uk or info@aqdastravel.co.uk with your booking reference (e.g. AQD-XXXXXX) and supporting details.',
+          'Please email customer.care@hidayahtravels.co.uk or info@hidayahtravels.co.uk with your booking reference (e.g. HTV-XXXXXX) and supporting details.',
       },
     ],
   },

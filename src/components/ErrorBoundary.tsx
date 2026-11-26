@@ -16,7 +16,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
   }
 
   override componentDidCatch(error: Error, info: React.ErrorInfo): void {
-    console.error('Aqdas Travel ErrorBoundary caught:', error, info);
+    console.error('Application ErrorBoundary caught:', error, info);
   }
 
   override render() {

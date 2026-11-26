@@ -26,22 +26,22 @@ export function replaceBrandAndDomainDeep<T>(
   const transformString = (text: string): string => {
     let out = text;
 
-    // 1. Replace full domain name (e.g. aqdastravel.co.uk -> newdomain.co.uk)
+    // 1. Replace full domain name (e.g. hidayahtravels.co.uk -> newdomain.co.uk)
     if (cleanOldDomain && cleanNewDomain && cleanOldDomain !== cleanNewDomain) {
       out = out.replace(new RegExp(escapeRegExp(cleanOldDomain), 'gi'), cleanNewDomain);
     }
 
-    // 2. Replace full brand name (e.g. Aqdas Travel -> Makkah Path Travel)
+    // 2. Replace full brand name (e.g. Hidayah Travels -> Makkah Path Travel)
     if (cleanOldBrand && cleanNewBrand && cleanOldBrand !== cleanNewBrand) {
       out = out.replace(new RegExp(escapeRegExp(cleanOldBrand), 'gi'), cleanNewBrand);
 
-      // Replace social handles like "aqdastraveluk" or "aqdastravel"
+      // Replace social handles like "hidayahtravelsuk" or "hidayahtravels"
       if (oldSlug && newSlug && oldSlug !== newSlug) {
         out = out.replace(new RegExp(`${escapeRegExp(oldSlug)}uk`, 'gi'), `${newSlug}uk`);
         out = out.replace(new RegExp(escapeRegExp(oldSlug), 'gi'), newSlug);
       }
 
-      // Replace short brand reference such as "Aqdas team" or "Aqdas emblem"
+      // Replace short brand reference such as "Hidayah team" or "Hidayah emblem"
       if (
         oldFirstWord &&
         newFirstWord &&

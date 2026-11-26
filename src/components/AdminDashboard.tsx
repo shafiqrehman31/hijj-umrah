@@ -149,7 +149,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     siteContent.contact.brandName
   );
   const [globalDomainInput, setGlobalDomainInput] = useState<string>(
-    siteContent.contact.domainName || 'aqdastravel.co.uk'
+    siteContent.contact.domainName || 'hidayahtravels.co.uk'
   );
   const [syncEmailAndSocials, setSyncEmailAndSocials] = useState<boolean>(true);
   const [applyingBrand, setApplyingBrand] = useState<boolean>(false);
@@ -171,6 +171,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [newUsername, setNewUsername] = useState(adminSettings?.username || 'admin');
   const [newPassword, setNewPassword] = useState('');
   const [newSlug, setNewSlug] = useState(adminRouteSlug || 'admin');
+  const [googleAuthError, setGoogleAuthError] = useState('');
 
   const showToast = (msg: string) => {
     setStatusBanner(msg);
@@ -212,10 +213,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           )}
 
+          {googleAuthError && (
+            <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed">
+              {googleAuthError}
+            </div>
+          )}
+
           <div className="space-y-3">
             <button
               type="button"
-              onClick={() => signInWithGoogle()}
+              onClick={async () => {
+                setGoogleAuthError('');
+                try {
+                  await signInWithGoogle();
+                } catch (err) {
+                  const msg = err instanceof Error ? err.message : String(err);
+                  if (msg.includes('auth/unauthorized-domain')) {
+                    setGoogleAuthError(
+                      `Domain "${window.location.hostname}" is not yet authorized in Firebase Auth. Add "${window.location.hostname}" under Firebase Console → Authentication → Settings → Authorized domains.`
+                    );
+                  } else if (msg.includes('auth/popup-blocked')) {
+                    setGoogleAuthError(
+                      'Google sign-in popup was blocked by your browser. Please allow popups for this site and try again.'
+                    );
+                  } else {
+                    setGoogleAuthError(`Google Sign-In failed: ${msg}`);
+                  }
+                }
+              }}
               className="w-full py-3 px-4 rounded-lg bg-[#0B3B2E] hover:bg-[#082A21] text-white text-sm font-semibold transition-colors cursor-pointer"
             >
               Sign in with Google Owner Account
@@ -408,7 +433,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     if (tab.id === 'branding') {
                       setBrandingDraft(siteContent.branding);
                       setGlobalBrandInput(siteContent.contact.brandName);
-                      setGlobalDomainInput(siteContent.contact.domainName || 'aqdastravel.co.uk');
+                      setGlobalDomainInput(siteContent.contact.domainName || 'hidayahtravels.co.uk');
                     }
                     if (tab.id === 'security') {
                       setNewUsername(adminSettings?.username || 'admin');

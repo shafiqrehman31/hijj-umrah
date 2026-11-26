@@ -70,7 +70,7 @@ export const MonthsAndWhySection: React.FC<MonthsAndWhySectionProps> = ({
           ))}
         </div>
 
-        {/* Why Choose Aqdas Travel Box */}
+        {/* Why Choose Us Box */}
         <div className="bg-[#0B3B2E] text-white rounded-2xl p-7 md:p-10">
           <div className="text-center mb-8">
             <h3 className="font-display text-2xl md:text-3xl font-semibold text-white">

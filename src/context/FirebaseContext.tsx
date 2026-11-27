@@ -60,6 +60,12 @@ export interface QuoteSubmissionInput {
   email: string;
   fullName: string;
   phone: string;
+  packageReservation?: {
+    packageTitle: string;
+    nights: number;
+    totalAmountGbp: number;
+    notes?: string;
+  };
 }
 
 export interface QuoteSubmissionResult {
@@ -521,20 +527,32 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const activeBrand = siteContent.contact.brandName || 'Hidayah Travels';
     const activeDomain = siteContent.contact.domainName || 'hidayahtravels.co.uk';
-    const emailSubject = `Your ${activeBrand} UK Umrah & Hajj Quote Request (${input.departureAirport})`;
+    const pkgInfo = input.packageReservation;
+    const emailSubject = pkgInfo
+      ? `Your ${activeBrand} Reservation Inquiry: ${pkgInfo.packageTitle}`
+      : `Your ${activeBrand} UK Umrah & Hajj Quote Request (${input.departureAirport})`;
     const emailBody = [
       `Assalamu Alaikum ${input.fullName},`,
       '',
-      `JazakAllahu Khayran for requesting a tailored pilgrimage quote with ${activeBrand} (${siteContent.contact.atolNumber}).`,
+      pkgInfo
+        ? `JazakAllahu Khayran for reserving "${pkgInfo.packageTitle}" with ${activeBrand} (${siteContent.contact.atolNumber}).`
+        : `JazakAllahu Khayran for requesting a tailored pilgrimage quote with ${activeBrand} (${siteContent.contact.atolNumber}).`,
       '',
       'Summary of Your Inquiry:',
+      ...(pkgInfo
+        ? [
+            `• Selected Package: ${pkgInfo.packageTitle} (${pkgInfo.nights} Nights)`,
+            `• Estimated Total: £${pkgInfo.totalAmountGbp.toLocaleString()}`,
+          ]
+        : []),
       `• Departure Date: ${input.departureDate}`,
       `• Departure Airport: ${input.departureAirport}`,
       `• Travellers: ${input.adults} Adult(s), ${input.children} Child(ren), ${input.infants} Infant(s)`,
       `• Contact Number: ${input.phone}`,
+      ...(pkgInfo?.notes ? [`• Special Requests: ${pkgInfo.notes}`] : []),
       `• Reference ID: ${quoteId.toUpperCase()}`,
       '',
-      'One of our senior UK Umrah specialists is reviewing live flight fares and Makkah/Madinah hotel availability for your exact dates. You will receive your bespoke Best-Price itinerary shortly.',
+      'One of our senior UK Umrah specialists is reviewing live flight fares and Makkah/Madinah hotel availability for your exact dates and will contact you shortly to finalize everything.',
       '',
       `Need immediate assistance? Call ${siteContent.contact.phone} or WhatsApp +${formatWhatsAppDigits(siteContent.contact.whatsappNumber)}.`,
       '',
@@ -553,8 +571,15 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       fullName: input.fullName.trim(),
       phone: input.phone.trim(),
       status: 'New',
-      emailTemplateSubject: emailSubject,
-      emailTemplateBody: emailBody,
+      emailTemplateSubject: emailSubject.slice(0, 200),
+      emailTemplateBody: emailBody.slice(0, 4000),
+      ...(pkgInfo
+        ? {
+            adminNotes: `Package: ${pkgInfo.packageTitle} | Est. £${pkgInfo.totalAmountGbp.toLocaleString()}${
+              pkgInfo.notes ? ` | Notes: ${pkgInfo.notes}` : ''
+            }`.slice(0, 1000),
+          }
+        : {}),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
@@ -566,8 +591,10 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const batch = writeBatch(db);
     batch.set(doc(db, 'quotes', quoteId), quotePayload);
     batch.set(doc(db, 'adminNotifications', notifId), {
-      title: `New Quote Request from ${input.fullName.trim()}`,
-      message: `${input.adults} Adults · ${input.departureAirport} · Depart ${input.departureDate} · ${input.phone}`,
+      title: pkgInfo
+        ? `New Package Reservation from ${input.fullName.trim()}`.slice(0, 160)
+        : `New Quote Request from ${input.fullName.trim()}`.slice(0, 160),
+      message: `${pkgInfo ? `${pkgInfo.packageTitle} · ` : ''}${input.adults} Adults · ${input.departureAirport} · Depart ${input.departureDate} · ${input.phone}`.slice(0, 600),
       category: 'quote',
       relatedId: quoteId,
       read: false,
@@ -798,12 +825,17 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // --- Admin Operations ---
   const savePackage = async (pkg: TravelPackage) => {
     const id = sanitizeId(pkg.id || `pkg-${Date.now()}`);
-    try {
-      await setDoc(doc(db, 'packages', id), {
+    const cleanedPkg = Object.fromEntries(
+      Object.entries({
         ...pkg,
         id,
+        makkahNights: Number(pkg.makkahNights ?? Math.ceil(pkg.nights / 2)),
+        madinahNights: Number(pkg.madinahNights ?? Math.floor(pkg.nights / 2)),
         updatedAt: serverTimestamp(),
-      });
+      }).filter(([, value]) => value !== undefined)
+    );
+    try {
+      await setDoc(doc(db, 'packages', id), cleanedPkg);
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, `packages/${id}`);
     }

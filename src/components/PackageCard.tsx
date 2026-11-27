@@ -27,6 +27,8 @@ export const PackageCard: React.FC<PackageCardProps> = ({ pkg, onSelectDetails }
   );
 
   const isSoldOut = pkg.availableSlots <= 0;
+  const makkahDays = pkg.makkahNights ?? Math.ceil(pkg.nights / 2);
+  const madinahDays = pkg.madinahNights ?? Math.floor(pkg.nights / 2);
 
   return (
     <article className="bg-white border border-stone-200 rounded-xl overflow-hidden flex flex-col justify-between transition-transform duration-200 hover:-translate-y-0.5 hover:border-[#0B3B2E]/40">
@@ -49,8 +51,30 @@ export const PackageCard: React.FC<PackageCardProps> = ({ pkg, onSelectDetails }
           )}
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent"
+            className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-black/30"
           />
+
+          {/* Top Stay Duration Sticker (Total Nights + Makkah & Madinah Days) */}
+          <div className="absolute top-3 left-3 right-3 flex items-start justify-start pointer-events-none">
+            <div
+              className="inline-flex items-center max-w-full rounded-lg overflow-hidden border border-[#E5C158]/85 shadow-[0_6px_18px_rgba(7,26,20,0.45)]"
+              aria-label={`${pkg.nights} Nights: ${makkahDays} Days Makkah, ${madinahDays} Days Madinah`}
+            >
+              <span className="bg-gradient-to-br from-[#F3D87F] via-[#E5C158] to-[#C59B27] text-[#081A14] px-2.5 py-1 text-[11px] font-extrabold tracking-wide whitespace-nowrap shrink-0 font-mono-num">
+                {pkg.nights} Nights
+              </span>
+              <span className="bg-[#081A14]/92 backdrop-blur-md text-white px-2.5 py-1 text-[11px] font-semibold tracking-tight flex items-center gap-1.5 truncate">
+                <span className="whitespace-nowrap">
+                  <strong className="font-mono-num text-[#E5C158]">{makkahDays}</strong> Days Makkah
+                </span>
+                <span aria-hidden="true" className="text-[#E5C158]/75">·</span>
+                <span className="whitespace-nowrap">
+                  <strong className="font-mono-num text-[#E5C158]">{madinahDays}</strong> Days Madinah
+                </span>
+              </span>
+            </div>
+          </div>
+
           <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between text-white">
             <div className="flex items-center gap-1" aria-label={`${pkg.starRating} Star Hotel Tier`}>
               {Array.from({ length: pkg.starRating }).map((_, idx) => (
@@ -132,7 +156,7 @@ export const PackageCard: React.FC<PackageCardProps> = ({ pkg, onSelectDetails }
       <div className="px-5 md:px-6 pb-5 pt-3 border-t border-stone-100 bg-[#FAFAF8]/60">
         <div className="flex items-baseline justify-between mb-4">
           <div>
-            <span className="text-xs text-slate-500 block">From</span>
+            <span className="text-xs text-slate-500 block">Starting From</span>
             <span className="font-mono-num text-2xl font-bold text-[#0B3B2E]">
               £{pkg.priceGbp.toLocaleString()}
             </span>

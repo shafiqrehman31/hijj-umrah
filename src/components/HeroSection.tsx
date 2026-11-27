@@ -1,9 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ArrowRight,
-  Calendar,
   CheckCircle2,
-  ChevronDown,
   Mail,
   Phone,
   PlaneTakeoff,
@@ -11,9 +9,13 @@ import {
   User,
   Users,
 } from 'lucide-react';
-import { useFirebase } from '../context/FirebaseContext';
+import { useFirebase, QuoteSubmissionResult } from '../context/FirebaseContext';
 import { UK_AIRPORTS } from '../data/defaultSiteData';
-import { QuoteSubmissionResult } from '../context/FirebaseContext';
+import {
+  FullWidthDatePicker,
+  LiquidSelectDropdown,
+  SelectOptionItem,
+} from './HeroFormControls';
 
 interface HeroSectionProps {
   onOpenBeatPrice: () => void;
@@ -39,20 +41,48 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [phone, setPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const dateInputRef = useRef<HTMLInputElement>(null);
+  const [openControl, setOpenControl] = useState<
+    'date' | 'airport' | 'adults' | 'children' | 'infants' | null
+  >(null);
 
-  const openDatePicker = () => {
-    const input = dateInputRef.current;
-    if (!input) return;
-    input.focus();
-    try {
-      if (typeof input.showPicker === 'function') {
-        input.showPicker();
-      }
-    } catch {
-      // Native ::-webkit-calendar-picker-indicator overlay opens calendar on WebKit/Blink
-    }
-  };
+  const airportOptions = useMemo<SelectOptionItem<string>[]>(
+    () =>
+      UK_AIRPORTS.map((airport) => {
+        const match = airport.match(/^(.*?)\s*\(([^)]+)\)$/);
+        if (match) {
+          return { value: airport, label: match[1].trim(), badge: match[2].trim() };
+        }
+        return { value: airport, label: airport };
+      }),
+    []
+  );
+
+  const adultOptions = useMemo<SelectOptionItem<number>[]>(
+    () =>
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12].map((n) => ({
+        value: n,
+        label: `${n} ${n === 1 ? 'Adult' : 'Adults'}`,
+      })),
+    []
+  );
+
+  const childOptions = useMemo<SelectOptionItem<number>[]>(
+    () =>
+      [0, 1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
+        value: n,
+        label: `${n} ${n === 1 ? 'Child' : 'Children'}`,
+      })),
+    []
+  );
+
+  const infantOptions = useMemo<SelectOptionItem<number>[]>(
+    () =>
+      [0, 1, 2, 3, 4].map((n) => ({
+        value: n,
+        label: `${n} ${n === 1 ? 'Infant' : 'Infants'}`,
+      })),
+    []
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,110 +210,69 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label
-                    htmlFor="hero-departure-date"
-                    className="block text-xs font-medium text-stone-200 mb-1.5"
-                  >
-                    Departure Date
-                  </label>
-                  <div
-                    onClick={openDatePicker}
-                    className="relative cursor-pointer group"
-                  >
-                    <Calendar className="w-4 h-4 text-[#E5C158] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
-                    <input
-                      id="hero-departure-date"
-                      ref={dateInputRef}
-                      type="date"
-                      required
-                      value={departureDate}
-                      onChange={(e) => setDepartureDate(e.target.value)}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openDatePicker();
-                      }}
-                      className="date-input-full-click w-full pl-9 pr-8 py-2.5 rounded-lg bg-white/12 border border-white/25 group-hover:border-[#E5C158]/70 text-white text-sm focus:outline-none focus:border-[#E5C158] [color-scheme:dark] cursor-pointer"
-                    />
-                    <ChevronDown className="w-4 h-4 text-stone-300 group-hover:text-[#E5C158] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none z-10 transition-colors" />
-                  </div>
-                </div>
+                <FullWidthDatePicker
+                  label="Departure Date"
+                  value={departureDate}
+                  onChange={setDepartureDate}
+                  isOpen={openControl === 'date'}
+                  onToggle={() =>
+                    setOpenControl((prev) => (prev === 'date' ? null : 'date'))
+                  }
+                  onClose={() => setOpenControl(null)}
+                />
 
-                <div>
-                  <label className="block text-xs font-medium text-stone-200 mb-1.5">
-                    Select Departure Airport
-                  </label>
-                  <div className="relative">
-                    <PlaneTakeoff className="w-4 h-4 text-[#E5C158] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <select
-                      value={departureAirport}
-                      onChange={(e) => setDepartureAirport(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-[#0E2020] border border-white/25 text-white text-sm focus:outline-none focus:border-[#E5C158]"
-                    >
-                      {UK_AIRPORTS.map((airport) => (
-                        <option key={airport} value={airport} className="bg-[#0B1F19] text-white">
-                          {airport}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+                <LiquidSelectDropdown
+                  label="Select Departure Airport"
+                  value={departureAirport}
+                  options={airportOptions}
+                  onChange={setDepartureAirport}
+                  icon={<PlaneTakeoff className="w-4 h-4" />}
+                  isOpen={openControl === 'airport'}
+                  onToggle={() =>
+                    setOpenControl((prev) => (prev === 'airport' ? null : 'airport'))
+                  }
+                  onClose={() => setOpenControl(null)}
+                />
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-stone-200 mb-1.5">
-                    Select Adults
-                  </label>
-                  <div className="relative">
-                    <Users className="w-3.5 h-3.5 text-[#E5C158] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <select
-                      value={adults}
-                      onChange={(e) => setAdults(Number(e.target.value))}
-                      className="w-full pl-8 pr-2 py-2.5 rounded-lg bg-[#0E2020] border border-white/25 text-white text-sm focus:outline-none focus:border-[#E5C158]"
-                    >
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12].map((n) => (
-                        <option key={n} value={n} className="bg-[#0B1F19]">
-                          {n} {n === 1 ? 'Adult' : 'Adults'}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+                <LiquidSelectDropdown
+                  label="Select Adults"
+                  value={adults}
+                  options={adultOptions}
+                  onChange={setAdults}
+                  icon={<Users className="w-3.5 h-3.5" />}
+                  isOpen={openControl === 'adults'}
+                  onToggle={() =>
+                    setOpenControl((prev) => (prev === 'adults' ? null : 'adults'))
+                  }
+                  onClose={() => setOpenControl(null)}
+                />
 
-                <div>
-                  <label className="block text-xs font-medium text-stone-200 mb-1.5">
-                    Select Children
-                  </label>
-                  <select
-                    value={childrenCount}
-                    onChange={(e) => setChildrenCount(Number(e.target.value))}
-                    className="w-full px-3 py-2.5 rounded-lg bg-[#0E2020] border border-white/25 text-white text-sm focus:outline-none focus:border-[#E5C158]"
-                  >
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                      <option key={n} value={n} className="bg-[#0B1F19]">
-                        {n} {n === 1 ? 'Child' : 'Children'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <LiquidSelectDropdown
+                  label="Select Children"
+                  value={childrenCount}
+                  options={childOptions}
+                  onChange={setChildrenCount}
+                  isOpen={openControl === 'children'}
+                  onToggle={() =>
+                    setOpenControl((prev) => (prev === 'children' ? null : 'children'))
+                  }
+                  onClose={() => setOpenControl(null)}
+                />
 
-                <div>
-                  <label className="block text-xs font-medium text-stone-200 mb-1.5">
-                    Select Infants
-                  </label>
-                  <select
-                    value={infants}
-                    onChange={(e) => setInfants(Number(e.target.value))}
-                    className="w-full px-3 py-2.5 rounded-lg bg-[#0E2020] border border-white/25 text-white text-sm focus:outline-none focus:border-[#E5C158]"
-                  >
-                    {[0, 1, 2, 3, 4].map((n) => (
-                      <option key={n} value={n} className="bg-[#0B1F19]">
-                        {n} {n === 1 ? 'Infant' : 'Infants'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <LiquidSelectDropdown
+                  label="Select Infants"
+                  value={infants}
+                  options={infantOptions}
+                  onChange={setInfants}
+                  isOpen={openControl === 'infants'}
+                  onToggle={() =>
+                    setOpenControl((prev) => (prev === 'infants' ? null : 'infants'))
+                  }
+                  onClose={() => setOpenControl(null)}
+                  menuAlign="right"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">

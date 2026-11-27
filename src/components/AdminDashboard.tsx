@@ -1011,7 +1011,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-slate-700 mb-1">
                       Price (£ GBP)
@@ -1047,21 +1047,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-700 mb-1">
-                      Total Nights
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={60}
-                      value={editingPkg.nights}
-                      onChange={(e) =>
-                        setEditingPkg({ ...editingPkg, nights: Number(e.target.value) })
-                      }
-                      className="w-full px-3 py-2 rounded-lg border border-stone-300 text-sm font-mono-num"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1">
                       Total Slots
                     </label>
                     <input
@@ -1089,6 +1074,67 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         setEditingPkg({
                           ...editingPkg,
                           availableSlots: Number(e.target.value),
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded-lg border border-stone-300 text-sm font-mono-num"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      Total Nights
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      max={60}
+                      value={editingPkg.nights}
+                      onChange={(e) =>
+                        setEditingPkg({ ...editingPkg, nights: Number(e.target.value) })
+                      }
+                      className="w-full px-3 py-2 rounded-lg border border-stone-300 text-sm font-mono-num"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      Days in Makkah
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={0}
+                      max={60}
+                      value={
+                        editingPkg.makkahNights ?? Math.ceil(editingPkg.nights / 2)
+                      }
+                      onChange={(e) =>
+                        setEditingPkg({
+                          ...editingPkg,
+                          makkahNights: Math.max(0, Number(e.target.value)),
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded-lg border border-stone-300 text-sm font-mono-num"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      Days in Madinah
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={0}
+                      max={60}
+                      value={
+                        editingPkg.madinahNights ?? Math.floor(editingPkg.nights / 2)
+                      }
+                      onChange={(e) =>
+                        setEditingPkg({
+                          ...editingPkg,
+                          madinahNights: Math.max(0, Number(e.target.value)),
                         })
                       }
                       className="w-full px-3 py-2 rounded-lg border border-stone-300 text-sm font-mono-num"
@@ -1206,6 +1252,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <td className="px-4 py-3">
                         <p className="font-semibold text-slate-900">{p.title}</p>
                         <p className="text-xs text-slate-500">
+                          {p.nights} Nights ({p.makkahNights ?? Math.ceil(p.nights / 2)}D Makkah ·{' '}
+                          {p.madinahNights ?? Math.floor(p.nights / 2)}D Madinah) ·{' '}
                           {p.makkahHotel} · {p.madinahHotel}
                         </p>
                       </td>
@@ -1219,7 +1267,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <td className="px-4 py-3 text-right space-x-2">
                         <button
                           type="button"
-                          onClick={() => setEditingPkg(p)}
+                          onClick={() =>
+                            setEditingPkg({
+                              ...p,
+                              makkahNights: p.makkahNights ?? Math.ceil(p.nights / 2),
+                              madinahNights: p.madinahNights ?? Math.floor(p.nights / 2),
+                            })
+                          }
                           className="px-3 py-1 rounded border border-stone-300 text-xs font-medium hover:bg-stone-50 cursor-pointer"
                         >
                           Edit
